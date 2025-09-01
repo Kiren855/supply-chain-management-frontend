@@ -4,8 +4,8 @@ import { tokenStore } from "../../../core/utils/tokenStore";
 
 
 const authService = {
-    register: async (email, username, password) => {
-        const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER, { email, username, password });
+    register: async (email, password) => {
+        const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER, { email, password });
         return data;
     },
 

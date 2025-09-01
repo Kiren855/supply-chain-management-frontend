@@ -1,16 +1,18 @@
 import { useState } from "react";
 import authService from "../services/authService";
-import { tokenStore } from "../../../core/utils/tokenStore";
 import { useNavigate } from "react-router-dom";
+import { UserIcon, EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 
 export default function Register() {
     const [formData, setFormData] = useState({
-        username: "",
         email: "",
         password: "",
+        confirmPassword: "",
     });
     const [loading, setLoading] = useState(false);
     const [message, setMessage] = useState("");
+
+    const navigate = useNavigate();
 
     const handleChange = (e) => {
         setFormData({
@@ -19,27 +21,42 @@ export default function Register() {
         });
     };
 
-    const navigate = useNavigate();
+    const validateForm = () => {
+        if (!formData.email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+            setMessage("Please enter a valid email address.");
+            return false;
+        }
+        if (formData.password.length < 8) {
+            setMessage("Password must be at least 8 characters.");
+            return false;
+        }
+        if (formData.password !== formData.confirmPassword) {
+            setMessage("Passwords do not match.");
+            return false;
+        }
+        return true;
+    };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
         setMessage("");
 
-        try {
-            await authService.register(formData.email, formData.username, formData.password);
-            setMessage("Register successful! Redirecting...");
+        if (!validateForm()) return;
 
-            const loginRes = await authService.login(
+        setLoading(true);
+        try {
+            // Gọi API register
+            await authService.register(formData.email, formData.password);
+
+            // Tự động login sau khi đăng ký
+            await authService.login(
                 formData.email,
-                formData.password
+                formData.password,
             );
 
             navigate("/company/register");
-
         } catch (error) {
             const msg = error.response?.data?.message || error.message;
-            console.log(error)
             setMessage(msg);
         } finally {
             setLoading(false);
@@ -53,57 +70,49 @@ export default function Register() {
                     Create Your Account
                 </h2>
 
-                {message && (
-                    <p className="text-red-500 text-center font-medium">{message}</p>
-                )}
+                {message && <p className="text-red-500 text-center font-medium">{message}</p>}
 
                 <form onSubmit={handleSubmit} className="space-y-5">
-                    {/* Username */}
-                    <div className="relative">
-                        <input
-                            type="text"
-                            name="username"
-                            value={formData.username}
-                            onChange={handleChange}
-                            required
-                            placeholder=" "
-                            className="peer w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                        <label className="absolute left-4 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-blue-500 peer-focus:text-sm">
-                            Username
-                        </label>
-                    </div>
-
                     {/* Email */}
-                    <div className="relative">
+                    <div className="relative flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
+                        <EnvelopeIcon className="w-5 h-5 text-gray-400 mr-3" />
                         <input
                             type="email"
                             name="email"
                             value={formData.email}
                             onChange={handleChange}
                             required
-                            placeholder=" "
-                            className="peer w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Email"
+                            className="flex-1 outline-none"
                         />
-                        <label className="absolute left-4 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-blue-500 peer-focus:text-sm">
-                            Email
-                        </label>
                     </div>
 
                     {/* Password */}
-                    <div className="relative">
+                    <div className="relative flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
+                        <LockClosedIcon className="w-5 h-5 text-gray-400 mr-3" />
                         <input
                             type="password"
                             name="password"
                             value={formData.password}
                             onChange={handleChange}
                             required
-                            placeholder=" "
-                            className="peer w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            placeholder="Password"
+                            className="flex-1 outline-none"
                         />
-                        <label className="absolute left-4 top-3 text-gray-400 text-sm transition-all peer-placeholder-shown:top-3 peer-placeholder-shown:text-gray-400 peer-placeholder-shown:text-base peer-focus:top-1 peer-focus:text-blue-500 peer-focus:text-sm">
-                            Password
-                        </label>
+                    </div>
+
+                    {/* Confirm Password */}
+                    <div className="relative flex items-center border border-gray-300 rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-blue-500">
+                        <LockClosedIcon className="w-5 h-5 text-gray-400 mr-3" />
+                        <input
+                            type="password"
+                            name="confirmPassword"
+                            value={formData.confirmPassword}
+                            onChange={handleChange}
+                            required
+                            placeholder="Confirm Password"
+                            className="flex-1 outline-none"
+                        />
                     </div>
 
                     <button
@@ -127,5 +136,4 @@ export default function Register() {
             </div>
         </div>
     );
-
 }

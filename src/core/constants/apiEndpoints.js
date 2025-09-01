@@ -2,7 +2,7 @@ const API_ENDPOINTS = {
     AUTH: {
         REGISTER: "http://localhost:8081/identity/api/v1/auth/root/register",
         LOGIN: "http://localhost:8081/identity/api/v1/auth/login",
-        REFRESH_TOKEN: "http://localhost:8081/identity/api/v1/auth/refresh-token",
+        REFRESH_TOKEN: "http://localhost:8081/identity/api/v1/auth/refresh",
     },
     COMPANY: {
         GET_ALL: "http://localhost:8081/identity/api/v1/companies",

@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import companyService from "../services/companyService";
 
+
 export default function CompanyRegister() {
     const navigate = useNavigate();
     const [formData, setFormData] = useState({
@@ -9,52 +10,82 @@ export default function CompanyRegister() {
         legalName: "",
         taxId: "",
         address: "",
-        companyPhone: "",
+        phone: "",
     });
+    const [errors, setErrors] = useState({});
 
     const handleChange = (e) => {
         const { name, value } = e.target;
         setFormData((prev) => ({ ...prev, [name]: value }));
     };
 
+    const validateForm = () => {
+        const newErrors = {};
+        if (!formData.companyName.trim()) newErrors.companyName = "Company Name is required";
+        if (!formData.legalName.trim()) newErrors.legalName = "Legal Name is required";
+        if (!formData.taxId.trim()) newErrors.taxId = "Tax ID is required";
+        else if (!/^\d+$/.test(formData.taxId)) newErrors.taxId = "Tax ID must be numeric";
+        if (!formData.address.trim()) newErrors.address = "Address is required";
+        if (!formData.phone.trim()) newErrors.phone = "Phone is required";
+        else if (!/^\+?\d{7,15}$/.test(formData.phone)) newErrors.phone = "Invalid phone number";
+
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleSubmit = async (e) => {
         e.preventDefault();
+        if (!validateForm()) return;
+
         try {
             await companyService.createCompany(formData);
             navigate("/dashboard");
         } catch (err) {
             console.error(err);
-            alert("Lỗi khi lưu thông tin công ty!");
+            alert("Error saving company information!");
         }
     };
 
+    const fields = [
+        { name: "companyName", label: "Company Name", required: true },
+        { name: "legalName", label: "Legal Name", required: true },
+        { name: "taxId", label: "Tax ID", required: true },
+        { name: "address", label: "Address", required: true },
+        { name: "phone", label: "Phone", required: true },
+    ];
+
     return (
-        <div className="flex justify-center items-center min-h-screen bg-gray-50">
+        <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">
             <form
                 onSubmit={handleSubmit}
-                className="bg-white shadow-lg rounded-2xl p-8 w-full max-w-lg"
+                className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-lg space-y-5"
             >
-                <h2 className="text-2xl font-bold mb-6">Thông tin công ty</h2>
+                <h2 className="text-2xl font-bold text-center">Company Information</h2>
 
-                {["companyName", "legalName", "taxId", "address", "companyPhone"].map((field) => (
-                    <div className="mb-4" key={field}>
-                        <label className="block text-sm font-medium">{field}</label>
+                {fields.map((field) => (
+                    <div key={field.name} className="flex flex-col">
+                        <label className="text-sm font-medium text-gray-700">{field.label}</label>
                         <input
                             type="text"
-                            name={field}
-                            value={formData[field]}
+                            name={field.name}
+                            value={formData[field.name]}
                             onChange={handleChange}
-                            className="mt-1 block w-full rounded-lg border-gray-300 shadow-sm p-2"
-                            required={field === "companyName"}
+                            placeholder={field.label}
+                            className={`mt-1 block w-full rounded-lg border p-2 outline-none focus:ring-2 focus:ring-blue-500 ${errors[field.name] ? "border-red-500" : "border-gray-300"
+                                }`}
+                            required={field.required}
                         />
+                        {errors[field.name] && (
+                            <p className="text-red-500 text-sm mt-1">{errors[field.name]}</p>
+                        )}
                     </div>
                 ))}
 
                 <button
                     type="submit"
-                    className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700"
+                    className="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold shadow-md hover:bg-blue-700 transition duration-300"
                 >
-                    Lưu và tiếp tục
+                    Save and Continue
                 </button>
             </form>
         </div>
