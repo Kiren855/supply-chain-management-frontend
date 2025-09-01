@@ -1,0 +1,31 @@
+import React from "react";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+
+// Pages
+import Register from "../modules/auth/pages/Register";
+import CompanyRegister from "../modules/company/pages/CompanyRegister";
+import PrivateRoute from "./PrivateRoute";
+//import Dashboard from "../modules/dashboard/pages/Dashboard";
+
+export default function AppRoutes() {
+    return (
+        <Router>
+            <Routes>
+                {/* Public routes */}
+                <Route path="/register" element={<Register />} />
+                {/* <Route path="/login" element={<Login />} /> */}
+
+                {/* All protected routes */}
+                <Route element={<PrivateRoute />}>
+                    <Route path="/company/register" element={<CompanyRegister />} />
+                    {/* <Route path="/dashboard" element={<Dashboard />} />
+                    <Route path="/users" element={<Users />} /> */}
+                    {/* Thêm tất cả route cần login ở đây */}
+                </Route>
+
+                {/* Default redirect */}
+                <Route path="*" element={<Navigate to="/register" />} />
+            </Routes>
+        </Router>
+    );
+}
