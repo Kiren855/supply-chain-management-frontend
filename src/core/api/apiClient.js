@@ -3,7 +3,7 @@ import { tokenStore } from "../utils/tokenStore";
 import refreshClient from "./refreshToken"; // import client riêng để refresh token
 import API_ENDPOINTS from "../constants/apiEndpoints";
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8081/identity/api/v1";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/identity/api/v1";
 
 const apiClient = axios.create({
     baseURL: API_BASE_URL,
@@ -53,7 +53,7 @@ apiClient.interceptors.response.use(
             isRefreshing = true;
             try {
                 const { data } = await refreshClient.post(API_ENDPOINTS.AUTH.REFRESH_TOKEN);
-                const newAccess = data?.accessToken;
+                const newAccess = data?.result.access_token;
                 if (!newAccess) throw new Error("No access token in refresh response");
 
                 tokenStore.set(newAccess);

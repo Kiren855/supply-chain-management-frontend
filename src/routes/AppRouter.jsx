@@ -3,8 +3,11 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 
 // Pages
 import Register from "../modules/auth/pages/Register";
+import Login from "../modules/auth/pages/Login";
 import CompanyRegister from "../modules/company/pages/CompanyRegister";
 import PrivateRoute from "./PrivateRoute";
+import Show from "../modules/hello/Show";
+
 //import Dashboard from "../modules/dashboard/pages/Dashboard";
 
 export default function AppRoutes() {
@@ -13,11 +16,12 @@ export default function AppRoutes() {
             <Routes>
                 {/* Public routes */}
                 <Route path="/register" element={<Register />} />
-                {/* <Route path="/login" element={<Login />} /> */}
+                <Route path="/login" element={<Login />} />
 
                 {/* All protected routes */}
                 <Route element={<PrivateRoute />}>
                     <Route path="/company/register" element={<CompanyRegister />} />
+                    <Route path="/show" element={<Show />} />
                     {/* <Route path="/dashboard" element={<Dashboard />} />
                     <Route path="/users" element={<Users />} /> */}
                     {/* Thêm tất cả route cần login ở đây */}
