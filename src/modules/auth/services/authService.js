@@ -1,6 +1,6 @@
-import apiClient from "../../../core/api/apiClient";
-import API_ENDPOINTS from "../../../core/constants/apiEndpoints";
-import { tokenStore } from "../../../core/utils/tokenStore";
+import apiClient from "@/core/api/apiClient";
+import API_ENDPOINTS from "@/core/constants/apiEndpoints";
+import { tokenStore } from "@/core/utils/tokenStore";
 
 
 const authService = {

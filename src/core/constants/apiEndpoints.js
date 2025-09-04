@@ -10,7 +10,9 @@ const API_ENDPOINTS = {
         UPDATE: "http://localhost:9000/identity/api/v1/companies",
     },
     USER: {
-        GET_PROFILE: "http://localhost:9000/identity/api/v1/users/me",
+        LIST: "http://localhost:9000/identity/api/v1/users",
+        CREATE: "http://localhost:9000/identity/api/v1/users",
+        DELETE: (id) => `http://localhost:9000/identity/api/v1/users/${id}`,
     },
 };
 

@@ -1,7 +1,5 @@
-let accessToken = null;
-
 export const tokenStore = {
-    get: () => accessToken,
-    set: (token) => { accessToken = token || null; },
-    clear: () => { accessToken = null; },
+    set: (token) => sessionStorage.setItem("access_token", token),
+    get: () => sessionStorage.getItem("access_token"),
+    clear: () => sessionStorage.removeItem("access_token"),
 };

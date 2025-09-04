@@ -8,7 +8,6 @@ import CompanyRegister from "../modules/company/pages/CompanyRegister";
 import PrivateRoute from "./PrivateRoute";
 import Show from "../modules/hello/Show";
 
-//import Dashboard from "../modules/dashboard/pages/Dashboard";
 
 export default function AppRoutes() {
     return (
@@ -22,13 +21,13 @@ export default function AppRoutes() {
                 <Route element={<PrivateRoute />}>
                     <Route path="/company/register" element={<CompanyRegister />} />
                     <Route path="/show" element={<Show />} />
-                    {/* <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/users" element={<Users />} /> */}
-                    {/* Thêm tất cả route cần login ở đây */}
+
+                    {/* Dashboard + React Admin
+                    <Route path="/dashboard/*" element={<Dashboard />} /> */}
                 </Route>
 
                 {/* Default redirect */}
-                <Route path="*" element={<Navigate to="/register" />} />
+                <Route path="*" element={<Navigate to="/login" />} />
             </Routes>
         </Router>
     );

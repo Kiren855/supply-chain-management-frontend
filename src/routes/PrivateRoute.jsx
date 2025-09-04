@@ -1,8 +1,7 @@
-// src/routes/PrivateRoute.jsx
 import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { tokenStore } from "../core/utils/tokenStore";
-import { initAuth } from "../core/services/authInit";
+import { tokenStore } from "@/core/utils/tokenStore";
+import { initAuth } from "@/core/services/authInit";
 
 export default function PrivateRoute() {
     const [loading, setLoading] = useState(true);
@@ -10,13 +9,8 @@ export default function PrivateRoute() {
 
     useEffect(() => {
         const checkAuth = async () => {
-            const token = tokenStore.get();
-            if (!token) {
-                setIsAuth(false);
-            } else {
-                const valid = await initAuth(); // check token hợp lệ / refresh nếu cần
-                setIsAuth(valid);
-            }
+            const valid = await initAuth();
+            setIsAuth(valid);
             setLoading(false);
         };
         checkAuth();
