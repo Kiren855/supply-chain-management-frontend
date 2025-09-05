@@ -118,7 +118,6 @@ export default function GroupsPage() {
                     Next
                 </button>
             </div>
-            <div className="text-xs text-gray-400 text-center">* Double click a row to view group detail</div>
         </div>
     );
 }

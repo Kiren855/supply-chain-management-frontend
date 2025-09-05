@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import groupService from "@/modules/group/service/groupService";
 import { FaUsers, FaShieldAlt, FaPlus, FaEdit, FaSave, FaTimes, FaUserSlash, FaTrash } from "react-icons/fa";
 import AddRoleModal from "../components/AddRoleModal";
+import AddUserModal from "../components/AddUserModal"; // Import modal mới
 
 // Component Spinner để hiển thị khi loading
 const Spinner = () => (
@@ -19,6 +20,7 @@ export default function GroupDetail() {
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState("");
     const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
+    const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false); // State cho modal thêm user
 
     // State cho bảng roles
     const [roles, setRoles] = useState([]);
@@ -99,6 +101,11 @@ export default function GroupDetail() {
     const handleAddRoleSuccess = () => {
         setIsAddRoleModalOpen(false);
         fetchGroupRoles(0);
+    };
+
+    const handleAddUserSuccess = () => {
+        setIsAddUserModalOpen(false);
+        fetchGroupUsers(0); // Tải lại danh sách user từ trang đầu
     };
 
     const handleSelectRoleToDelete = (roleId) => {
@@ -294,7 +301,10 @@ export default function GroupDetail() {
                                     >
                                         <FaTrash /> Remove
                                     </button>
-                                    <button className="flex items-center gap-2 px-3 py-1.5 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition text-sm">
+                                    <button
+                                        onClick={() => setIsAddUserModalOpen(true)} // Mở modal thêm user
+                                        className="flex items-center gap-2 px-3 py-1.5 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition text-sm"
+                                    >
                                         <FaPlus /> Add Member
                                     </button>
                                 </div>
@@ -356,6 +366,14 @@ export default function GroupDetail() {
                 onClose={() => setIsAddRoleModalOpen(false)}
                 groupId={groupId}
                 onSuccess={handleAddRoleSuccess}
+            />
+
+            {/* Render modal thêm user */}
+            <AddUserModal
+                isOpen={isAddUserModalOpen}
+                onClose={() => setIsAddUserModalOpen(false)}
+                groupId={groupId}
+                onSuccess={handleAddUserSuccess}
             />
         </>
     );

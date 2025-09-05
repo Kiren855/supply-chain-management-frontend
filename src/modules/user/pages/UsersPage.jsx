@@ -126,7 +126,7 @@ export default function UsersPage() {
                     Next
                 </button>
             </div>
-            <div className="text-xs text-gray-400 text-center">* Double click a row to view user detail</div>
+
         </div>
     );
 }
