@@ -8,6 +8,10 @@ const authService = {
         const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER, { email, password });
         return data;
     },
+    registerSub: async (username, password) => {
+        const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER_SUB, { username, password });
+        return data;
+    },
 
     login: async (email, password) => {
         const { data } = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, { email, password });

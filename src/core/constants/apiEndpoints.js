@@ -1,6 +1,7 @@
 const API_ENDPOINTS = {
     AUTH: {
         REGISTER: "http://localhost:9000/identity/api/v1/auth/root/register",
+        REGISTER_SUB: "http://localhost:9000/identity/api/v1/auth/sub/register",
         LOGIN: "http://localhost:9000/identity/api/v1/auth/login",
         REFRESH_TOKEN: "http://localhost:9000/identity/api/v1/auth/refresh",
     },

@@ -1,22 +1,23 @@
 import { useEffect, useState } from "react";
 import groupService from "@/modules/group/service/groupService";
 import { useNavigate } from "react-router-dom";
+import Pagination from "@/components/common/Pagination"; // Import component Pagination
 
 export default function GroupsPage() {
     const [groups, setGroups] = useState([]);
     const [page, setPage] = useState(0);
-    const [size] = useState(10);
+    const [size, setSize] = useState(10); // Chuyển size thành state
     const [totalPages, setTotalPages] = useState(1);
     const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
-    const fetchGroups = async (pageNumber = 0) => {
+    const fetchGroups = async (pageNumber = 0, pageSize = size) => {
         setLoading(true);
         try {
-            const response = await groupService.getList(pageNumber, size);
+            const response = await groupService.getList(pageNumber, pageSize);
             setGroups(response.result.content);
             setTotalPages(response.result.totalPages);
-            setPage(response?.result?.pageable?.pageNumber ?? 0);
+            setPage(response?.result?.pageNumber ?? 0);
         } catch (error) {
             console.error("Failed to fetch groups:", error);
         } finally {
@@ -24,19 +25,15 @@ export default function GroupsPage() {
         }
     };
 
+    // useEffect sẽ chạy lại khi `size` thay đổi, và fetch lại từ trang đầu
     useEffect(() => {
-        fetchGroups();
-    }, []);
+        fetchGroups(0, size);
+    }, [size]);
 
-    const handlePrev = () => {
-        if (page > 0) fetchGroups(page - 1);
+    const handlePageChange = (newPage) => {
+        fetchGroups(newPage, size);
     };
 
-    const handleNext = () => {
-        if (page < totalPages - 1) fetchGroups(page + 1);
-    };
-
-    // Double click vào hàng để chuyển đến trang chi tiết group
     const handleRowDoubleClick = (group) => {
         navigate(`/groups/${group.id}`, {
             state: { group_name: group.group_name },
@@ -45,7 +42,7 @@ export default function GroupsPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-gray-800 text-center"></h1>
+            <h1 className="text-3xl font-bold text-gray-800">Group Management</h1>
 
             <div className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-gray-200">
                 <table className="min-w-full divide-y divide-gray-200">
@@ -98,25 +95,30 @@ export default function GroupsPage() {
                 </table>
             </div>
 
-            {/* Pagination */}
+            {/* Pagination và PageSize Dropdown */}
             <div className="flex justify-between items-center mt-2">
-                <button
-                    onClick={handlePrev}
-                    disabled={page === 0}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 disabled:opacity-50"
-                >
-                    Previous
-                </button>
-                <span className="text-gray-700 font-medium">
-                    Page {page + 1} of {totalPages}
-                </span>
-                <button
-                    onClick={handleNext}
-                    disabled={page >= totalPages - 1}
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 disabled:opacity-50"
-                >
-                    Next
-                </button>
+                <div className="flex items-center gap-2 text-sm">
+                    <label htmlFor="pageSize" className="text-gray-700 font-medium">Items per page:</label>
+                    <select
+                        id="pageSize"
+                        value={size}
+                        onChange={(e) => setSize(Number(e.target.value))}
+                        className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    >
+                        <option value={6}>6</option>
+                        <option value={10}>10</option>
+                        <option value={20}>20</option>
+                        <option value={50}>50</option>
+                    </select>
+                </div>
+
+                <Pagination
+                    currentPage={page}
+                    totalPages={totalPages}
+                    onPageChange={handlePageChange}
+                />
+
+                <div></div>
             </div>
         </div>
     );
