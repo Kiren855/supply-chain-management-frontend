@@ -28,7 +28,7 @@ export default function Login() {
         try {
             await authService.login(formData.usernameOrEmail, formData.password);
 
-            navigate("/show");
+            navigate("/users");
         } catch (error) {
             const msg = error.response?.data?.message || error.message;
             setMessage(msg);
