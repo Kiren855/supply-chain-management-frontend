@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import groupService from "@/modules/group/service/groupService";
 import { useNavigate } from "react-router-dom";
-import Pagination from "@/components/common/Pagination"; // Import component Pagination
+import Pagination from "@/components/common/Pagination";
+import { FaPlus } from "react-icons/fa"; // Import icon
 
 export default function GroupsPage() {
     const [groups, setGroups] = useState([]);
@@ -42,7 +43,15 @@ export default function GroupsPage() {
 
     return (
         <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-gray-800">Group Management</h1>
+            <div className="flex justify-between items-center">
+                <h1 className="text-3xl font-bold text-gray-800">Group Management</h1>
+                <button
+                    onClick={() => navigate('/groups/create')}
+                    className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg shadow hover:bg-blue-700 transition"
+                >
+                    <FaPlus /> Create Group
+                </button>
+            </div>
 
             <div className="overflow-x-auto bg-white rounded-2xl shadow-lg border border-gray-200">
                 <table className="min-w-full divide-y divide-gray-200">

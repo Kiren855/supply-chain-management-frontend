@@ -13,6 +13,8 @@ import UsersPage from "@/modules/user/pages/UsersPage";
 import UserDetailPage from "@/modules/user/pages/UserDetailPage";
 import GroupsPage from "@/modules/group/pages/GroupsPage";
 import GroupDetail from "@/modules/group/pages/GroupDetail";
+import CreateGroupPage from "@/modules/group/pages/CreateGroupPage";
+
 
 export default function AppRoutes() {
     return (
@@ -32,6 +34,7 @@ export default function AppRoutes() {
                         <Route path="users" element={<UsersPage />} />
                         <Route path="users/:userId" element={<UserDetailPage />} />
                         <Route path="groups" element={<GroupsPage />} />
+                        <Route path="groups/create" element={<CreateGroupPage />} />
                         <Route path="groups/:groupId" element={<GroupDetail />} />
                     </Route>
                 </Route>

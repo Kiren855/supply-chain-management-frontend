@@ -84,13 +84,17 @@ export default function AddUserModal({ isOpen, onClose, groupId, onSuccess }) {
                                 <tr><td colSpan="3" className="text-center py-4">Loading...</td></tr>
                             ) : (
                                 allUsers.map((user) => (
-                                    <tr key={user.user_id} className="hover:bg-gray-50">
+                                    <tr
+                                        key={user.user_id}
+                                        className="hover:bg-gray-50 cursor-pointer"
+                                        onClick={() => handleSelectUser(user.user_id)}
+                                    >
                                         <td className="px-4 py-3 text-center">
                                             <input
                                                 type="checkbox"
-                                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 pointer-events-none"
                                                 checked={selectedUsers.includes(user.user_id)}
-                                                onChange={() => handleSelectUser(user.user_id)}
+                                                readOnly
                                             />
                                         </td>
                                         <td className="px-4 py-3 font-medium text-gray-800">{user.username}</td>

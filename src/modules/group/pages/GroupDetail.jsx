@@ -1,9 +1,9 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom"; // 1. Import useNavigate
 import groupService from "@/modules/group/service/groupService";
-import { FaUsers, FaShieldAlt, FaPlus, FaEdit, FaSave, FaTimes, FaUserSlash, FaTrash } from "react-icons/fa";
+import { FaUsers, FaPlus, FaEdit, FaSave, FaTimes, FaTrash, FaArrowLeft } from "react-icons/fa"; // 2. Import FaArrowLeft
 import AddRoleModal from "../components/AddRoleModal";
-import AddUserModal from "../components/AddUserModal"; // Import modal mới
+import AddUserModal from "../components/AddUserModal";
 
 // Component Spinner để hiển thị khi loading
 const Spinner = () => (
@@ -14,13 +14,14 @@ const Spinner = () => (
 
 export default function GroupDetail() {
     const { groupId } = useParams();
+    const navigate = useNavigate(); // 3. Khởi tạo navigate
     const [group, setGroup] = useState(null);
     const [activeTab, setActiveTab] = useState("roles");
     const [loading, setLoading] = useState(true);
     const [isEditing, setIsEditing] = useState(false);
     const [editedName, setEditedName] = useState("");
     const [isAddRoleModalOpen, setIsAddRoleModalOpen] = useState(false);
-    const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false); // State cho modal thêm user
+    const [isAddUserModalOpen, setIsAddUserModalOpen] = useState(false);
 
     // State cho bảng roles
     const [roles, setRoles] = useState([]);
@@ -78,7 +79,6 @@ export default function GroupDetail() {
         };
         fetchGroupData();
     }, [groupId]);
-
     const handleSaveName = async () => {
         if (editedName.trim() === "" || editedName === group.group_name) {
             setIsEditing(false);
@@ -92,34 +92,27 @@ export default function GroupDetail() {
             console.error("Failed to update group name:", error);
         }
     };
-
     const handleCancelEdit = () => {
         setIsEditing(false);
         setEditedName(group.group_name);
     };
-
     const handleAddRoleSuccess = () => {
         setIsAddRoleModalOpen(false);
         fetchGroupRoles(0);
     };
-
     const handleAddUserSuccess = () => {
         setIsAddUserModalOpen(false);
-        fetchGroupUsers(0); // Tải lại danh sách user từ trang đầu
+        fetchGroupUsers(0);
     };
-
     const handleSelectRoleToDelete = (roleId) => {
         setSelectedRolesToDelete((prev) =>
             prev.includes(roleId) ? prev.filter((id) => id !== roleId) : [...prev, roleId]
         );
     };
-
     const handleDeleteRoles = async () => {
         if (selectedRolesToDelete.length === 0) return;
         try {
-            // await groupService.removeRoles(groupId, { roles: selectedRolesToDelete });
             await groupService.removeRoles(groupId, { roles: selectedRolesToDelete });
-            console.log("Deleting roles:", selectedRolesToDelete);
             setSelectedRolesToDelete([]);
             if (roles.length === selectedRolesToDelete.length && rolesPage > 0) {
                 fetchGroupRoles(rolesPage - 1);
@@ -130,13 +123,11 @@ export default function GroupDetail() {
             console.error("Failed to delete roles:", error);
         }
     };
-
     const handleSelectUserToDelete = (userId) => {
         setSelectedUsersToDelete((prev) =>
             prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
         );
     };
-
     const handleDeleteUsers = async () => {
         if (selectedUsersToDelete.length === 0) return;
         try {
@@ -152,6 +143,7 @@ export default function GroupDetail() {
         }
     };
 
+
     if (loading) {
         return (
             <div className="flex items-center justify-center h-96">
@@ -165,6 +157,10 @@ export default function GroupDetail() {
             <div className="w-full mx-auto p-4 sm:p-6 lg:p-8 space-y-6">
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
                     <div className="flex items-center gap-4">
+                        {/* 4. Thêm nút Back */}
+                        <button onClick={() => navigate(-1)} className="p-2 rounded-full hover:bg-gray-200 transition">
+                            <FaArrowLeft className="text-gray-600" />
+                        </button>
                         <div className="bg-blue-100 p-3 rounded-full">
                             <FaUsers className="w-8 h-8 text-blue-600" />
                         </div>
@@ -259,13 +255,17 @@ export default function GroupDetail() {
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {roles.length > 0 ? (
                                             roles.map((role) => (
-                                                <tr key={role.id} className="hover:bg-gray-50">
+                                                <tr
+                                                    key={role.id}
+                                                    className="hover:bg-gray-50 cursor-pointer"
+                                                    onClick={() => handleSelectRoleToDelete(role.id)}
+                                                >
                                                     <td className="px-4 py-3 text-center">
                                                         <input
                                                             type="checkbox"
-                                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 pointer-events-none"
                                                             checked={selectedRolesToDelete.includes(role.id)}
-                                                            onChange={() => handleSelectRoleToDelete(role.id)}
+                                                            readOnly
                                                         />
                                                     </td>
                                                     <td className="px-4 py-3 font-medium text-left text-gray-800">{role.role_name}</td>
@@ -322,13 +322,17 @@ export default function GroupDetail() {
                                     <tbody className="bg-white divide-y divide-gray-200">
                                         {users.length > 0 ? (
                                             users.map((user) => (
-                                                <tr key={user.user_id} className="hover:bg-gray-50">
+                                                <tr
+                                                    key={user.user_id}
+                                                    className="hover:bg-gray-50 cursor-pointer"
+                                                    onClick={() => handleSelectUserToDelete(user.user_id)}
+                                                >
                                                     <td className="px-4 py-3 text-center">
                                                         <input
                                                             type="checkbox"
-                                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                                                            className="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500 pointer-events-none"
                                                             checked={selectedUsersToDelete.includes(user.user_id)}
-                                                            onChange={() => handleSelectUserToDelete(user.user_id)}
+                                                            readOnly
                                                         />
                                                     </td>
                                                     <td className="px-4 py-3 text-left font-medium text-gray-800">{user.username}</td>

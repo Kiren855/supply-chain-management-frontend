@@ -2,20 +2,20 @@ import apiClient from "@/core/api/apiClient";
 import API_ENDPOINTS from "@/core/constants/apiEndpoints";
 
 const groupService = {
-    getList: async (page, size) => {
+    create: async (payload) => {
+        const { data } = await apiClient.post(API_ENDPOINTS.GROUP.CREATE, payload);
+        return data;
+    },
+
+    getList: async (pageNumber, pageSize) => {
         const { data } = await apiClient.get(API_ENDPOINTS.GROUP.LIST, {
-            params: { page, size },
+            params: { page: pageNumber, size: pageSize },
         });
         return data;
     },
 
     getDetail: async (groupId) => {
         const { data } = await apiClient.get(API_ENDPOINTS.GROUP.DETAIL(groupId));
-        return data;
-    },
-
-    create: async (payload) => {
-        const { data } = await apiClient.post(API_ENDPOINTS.GROUP.CREATE, payload);
         return data;
     },
 
