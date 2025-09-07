@@ -4,6 +4,9 @@ const API_ENDPOINTS = {
         REGISTER_SUB: "http://localhost:9000/identity/api/v1/auth/sub/register",
         LOGIN: "http://localhost:9000/identity/api/v1/auth/login",
         REFRESH_TOKEN: "http://localhost:9000/identity/api/v1/auth/refresh",
+        CHANGE_SUB_PASSWORD: (userId) => `http://localhost:9000/identity/api/v1/auth/${userId}/change-password`,
+        CHANGE_ROOT_PASSWORD: "http://localhost:9000/identity/api/v1/auth/change-password",
+        LOGOUT: "http://localhost:9000/identity/api/v1/auth/logout",
     },
     COMPANY: {
         GET_ALL: "http://localhost:9000/identity/api/v1/companies",

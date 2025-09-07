@@ -20,6 +20,16 @@ const authService = {
         return data;
     },
 
+    changeSubPassword: async (userId, newPassword) => {
+        const { data } = await apiClient.post(API_ENDPOINTS.AUTH.CHANGE_SUB_PASSWORD(userId), { new_password: newPassword });
+        return data;
+    },
+
+    changeRootPassword: async (newPassword) => {
+        const { data } = await apiClient.post(API_ENDPOINTS.AUTH.CHANGE_ROOT_PASSWORD, { new_password: newPassword });
+        return data;
+    },
+
     logout: async () => {
         try {
             await apiClient.post(API_ENDPOINTS.AUTH.LOGOUT);
