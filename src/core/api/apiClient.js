@@ -1,7 +1,7 @@
 import axios from "axios";
 import { tokenStore } from "../utils/tokenStore";
-import refreshClient from "./refreshToken"; // import client riêng để refresh token
-import API_ENDPOINTS from "../constants/apiEndpoints";
+// SỬA LẠI DÒNG NÀY: Import hàm refreshToken từ file của nó
+import { refreshToken } from "./refreshToken";
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:9000/identity/api/v1";
 
@@ -11,17 +11,6 @@ const apiClient = axios.create({
     withCredentials: true,
 });
 
-let isRefreshing = false;
-let pendingQueue = [];
-
-const processQueue = (error, newToken) => {
-    pendingQueue.forEach(({ resolve, reject }) => {
-        if (error) reject(error);
-        else resolve(newToken);
-    });
-    pendingQueue = [];
-};
-
 // Interceptor request
 apiClient.interceptors.request.use((config) => {
     const token = tokenStore.get();
@@ -29,44 +18,21 @@ apiClient.interceptors.request.use((config) => {
     return config;
 });
 
-// Interceptor response
+// SỬA LẠI INTERCEPTOR RESPONSE
 apiClient.interceptors.response.use(
     (res) => res,
     async (error) => {
-        const original = error.config;
+        const originalRequest = error.config;
 
-        if (error.response?.status === 401 && !original._retry) {
-            original._retry = true;
+        if (error.response?.status === 401 && !originalRequest._retry) {
+            originalRequest._retry = true;
 
-            if (isRefreshing) {
-                return new Promise((resolve, reject) => {
-                    pendingQueue.push({
-                        resolve: (token) => {
-                            original.headers.Authorization = `Bearer ${token}`;
-                            resolve(apiClient(original));
-                        },
-                        reject,
-                    });
-                });
-            }
-
-            isRefreshing = true;
             try {
-                const { data } = await refreshClient.post(API_ENDPOINTS.AUTH.REFRESH_TOKEN);
-                const newAccess = data?.result.access_token;
-                if (!newAccess) throw new Error("No access token in refresh response");
-
-                tokenStore.set(newAccess);
-                processQueue(null, newAccess);
-
-                original.headers.Authorization = `Bearer ${newAccess}`;
-                return apiClient(original);
-            } catch (refreshErr) {
-                tokenStore.clear();
-                processQueue(refreshErr, null);
-                return Promise.reject(refreshErr);
-            } finally {
-                isRefreshing = false;
+                const newAccessToken = await refreshToken();
+                originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+                return apiClient(originalRequest);
+            } catch (refreshError) {
+                return Promise.reject(refreshError);
             }
         }
 

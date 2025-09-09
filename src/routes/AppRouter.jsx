@@ -14,6 +14,7 @@ import UserDetailPage from "@/modules/user/pages/UserDetailPage";
 import GroupsPage from "@/modules/group/pages/GroupsPage";
 import GroupDetail from "@/modules/group/pages/GroupDetail";
 import CreateGroupPage from "@/modules/group/pages/CreateGroupPage";
+import RealtimeLogsPage from "@/modules/logging/pages/RealtimeLogsPage"; // 1. Import trang mới
 
 
 export default function AppRoutes() {
@@ -36,6 +37,9 @@ export default function AppRoutes() {
                         <Route path="groups" element={<GroupsPage />} />
                         <Route path="groups/create" element={<CreateGroupPage />} />
                         <Route path="groups/:groupId" element={<GroupDetail />} />
+
+                        {/* 2. Thêm route cho trang Activity Logs */}
+                        <Route path="realtime-logs" element={<RealtimeLogsPage />} />
                     </Route>
                 </Route>
 

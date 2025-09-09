@@ -1,11 +1,12 @@
 import apiClient from "@/core/api/apiClient";
+import authApiClient from "@/core/api/authApiClient";
 import API_ENDPOINTS from "@/core/constants/apiEndpoints";
 import { tokenStore } from "@/core/utils/tokenStore";
 
 
 const authService = {
     register: async (email, password) => {
-        const { data } = await apiClient.post(API_ENDPOINTS.AUTH.REGISTER, { email, password });
+        const { data } = await authApiClient.post(API_ENDPOINTS.AUTH.REGISTER, { email, password });
         return data;
     },
     registerSub: async (username, password) => {
@@ -14,8 +15,8 @@ const authService = {
     },
 
     login: async (email, password) => {
-        const { data } = await apiClient.post(API_ENDPOINTS.AUTH.LOGIN, { email, password });
-        // backend trả về { accessToken }, refresh token nằm trong HttpOnly cookie
+        const { data } = await authApiClient.post(API_ENDPOINTS.AUTH.LOGIN, { email, password });
+
         if (data?.result.access_token) tokenStore.set(data.result.access_token);
         return data;
     },

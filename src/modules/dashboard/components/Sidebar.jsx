@@ -1,37 +1,41 @@
 import { useState } from "react";
 import {
-    UsersIcon,
-    Squares2X2Icon,
     ChevronLeftIcon,
     ChevronRightIcon,
     ChevronDownIcon,
     ChevronUpIcon,
-    BuildingStorefrontIcon,
+    HomeIcon,
+    UsersIcon,
     CubeIcon,
+    BuildingStorefrontIcon,
+    ClockIcon,
+    Cog6ToothIcon,
+
 } from "@heroicons/react/24/outline";
 import { NavLink } from "react-router-dom";
+import { FaTachometerAlt, FaUsers, FaLayerGroup, FaHistory } from "react-icons/fa";
 
 const menuItems = [
     {
         name: "User Management",
-        icon: UsersIcon,
+        icon: FaUsers,
         children: [
-            { name: "Users", path: "/users", icon: UsersIcon },
-            { name: "Groups", path: "/groups", icon: Squares2X2Icon },
+            { name: "Users", path: "users", icon: FaUsers },
+            { name: "Groups", path: "groups", icon: FaLayerGroup },
         ],
     },
     {
         name: "Warehouse Management",
         icon: BuildingStorefrontIcon,
         children: [
-            { name: "Warehouses", path: "/warehouses", icon: BuildingStorefrontIcon },
+            { name: "Warehouses", path: "warehouses", icon: BuildingStorefrontIcon },
         ],
     },
     {
         name: "Product Management",
         icon: CubeIcon,
         children: [
-            { name: "Products", path: "/products", icon: CubeIcon },
+            { name: "Products", path: "products", icon: CubeIcon },
         ],
     },
 ];
@@ -46,6 +50,12 @@ export default function Sidebar() {
             [menuName]: !prev[menuName],
         }));
     };
+
+    const navLinkClass = ({ isActive }) =>
+        `flex items-center px-6 py-3 mt-4 transition-colors duration-300 transform ${isActive
+            ? "text-gray-700 bg-gray-200"
+            : "text-gray-600 hover:bg-gray-200 hover:text-gray-700"
+        }`;
 
     return (
         <div className={`bg-gradient-to-b from-blue-50 to-white border-r border-gray-200 min-h-screen flex flex-col transition-all duration-300
@@ -99,6 +109,16 @@ export default function Sidebar() {
                         )}
                     </div>
                 ))}
+                <div className="border-t border-gray-200 my-4"></div>
+                <NavLink to="/" className={navLinkClass} end>
+                    <FaTachometerAlt className="w-6 h-6" />
+                    <span className="mx-4">Dashboard</span>
+                </NavLink>
+
+                <NavLink to="realtime-logs" className={navLinkClass}>
+                    <FaHistory className="w-6 h-6" />
+                    <span className="mx-4">Activity Logs</span>
+                </NavLink>
             </nav>
         </div>
     );

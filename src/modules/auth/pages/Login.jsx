@@ -26,9 +26,16 @@ export default function Login() {
         setMessage("");
         setLoading(true);
         try {
-            await authService.login(formData.usernameOrEmail, formData.password);
+            const response = await authService.login(formData.usernameOrEmail, formData.password);
 
-            navigate("/users");
+
+            if (response?.result?.access_token) {
+                // Chỉ khi nào chắc chắn có token, chúng ta mới điều hướng
+                navigate("/users");
+            } else {
+                // Nếu không, chúng ta báo lỗi và không điều hướng
+                throw new Error("Login failed. Please check your credentials.");
+            }
         } catch (error) {
             const msg = error.response?.data?.message || error.message;
             setMessage(msg);
