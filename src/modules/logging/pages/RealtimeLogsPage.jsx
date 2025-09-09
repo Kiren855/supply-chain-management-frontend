@@ -3,7 +3,7 @@ import { Client } from '@stomp/stompjs';
 import { jwtDecode } from 'jwt-decode';
 import { FaCircle } from 'react-icons/fa';
 import { tokenStore } from "@/core/utils/tokenStore";
-import { refreshToken } from '@/core/api/refreshToken'; // Import hàm refreshToken
+import { refreshToken } from '@/core/api/refreshToken';
 
 const getCompanyIdFromToken = () => {
     try {
@@ -28,9 +28,16 @@ const formatTimestamp = (isoString) => {
 export default function RealtimeLogsPage() {
     const [logs, setLogs] = useState([]);
     const [connectionStatus, setConnectionStatus] = useState('Initializing...');
-    const isRetryingRef = useRef(false); // Khởi tạo useRef để theo dõi trạng thái retry
+    const clientRef = useRef(null); // Dùng ref để lưu client instance
+    const isRetryingRef = useRef(false);
 
-    useEffect(() => {
+    // BƯỚC 1: Gói toàn bộ logic kết nối vào một hàm
+    const connectWebSocket = async () => {
+        // Ngắt kết nối cũ nếu có
+        if (clientRef.current?.active) {
+            await clientRef.current.deactivate();
+        }
+
         const companyId = getCompanyIdFromToken();
         const token = tokenStore.get();
 
@@ -39,12 +46,15 @@ export default function RealtimeLogsPage() {
             return;
         }
 
+        setConnectionStatus(isRetryingRef.current ? 'Reconnecting...' : 'Connecting...');
+
         const client = new Client({
             brokerURL: "ws://localhost:9000/logging/ws-logs",
             connectHeaders: { Authorization: `Bearer ${token}` },
             reconnectDelay: 0,
             onConnect: () => {
                 setConnectionStatus('Connected');
+                isRetryingRef.current = false; // Reset lại khi thành công
                 client.subscribe(`/topic/logs/${companyId}`, (message) => {
                     const newLog = JSON.parse(message.body);
                     setLogs(prevLogs => [newLog, ...prevLogs.slice(0, 99)]);
@@ -60,33 +70,41 @@ export default function RealtimeLogsPage() {
                 setConnectionStatus('Authentication Failed. Refreshing token...');
                 isRetryingRef.current = true;
                 try {
-                    await refreshToken(); // Gọi hàm tập trung
-                    connectWebSocket(); // Thử kết nối lại
+                    await refreshToken();
+                    connectWebSocket(); // Gọi lại chính nó để thử lại
                 } catch (refreshError) {
                     setConnectionStatus('Fatal Error: Could not refresh token.');
                 }
             },
-
             onStompError: (frame) => {
-                console.error('STOMP Error:', frame.headers['message'], frame.body);
+                console.error('STOMP Error:', frame.headers['message']);
                 setConnectionStatus('Error');
             },
-            onDisconnect: () => {
-                setConnectionStatus('Disconnected');
-            }
         });
 
-        setConnectionStatus('Connecting...');
+        clientRef.current = client; // Lưu instance vào ref
         client.activate();
+    };
 
+    // BƯỚC 2: Gọi hàm kết nối bên trong useEffect
+    useEffect(() => {
+        connectWebSocket();
+
+        // Hàm dọn dẹp khi component bị unmount
         return () => {
-            client.deactivate();
+            if (clientRef.current) {
+                clientRef.current.deactivate();
+            }
         };
-    }, []); // useEffect chỉ chạy một lần
+    }, []); // Mảng rỗng đảm bảo useEffect chỉ chạy một lần
 
     const statusColor = {
         'Connected': 'text-green-500',
         'Connecting...': 'text-yellow-500',
+        'Reconnecting...': 'text-blue-500',
+        'Authentication Failed. Refreshing token...': 'text-orange-500',
+        'Fatal Error: Could not refresh token.': 'text-red-700',
+        'Fatal Error: Could not connect after refresh.': 'text-red-700',
         'Disconnected': 'text-red-500',
         'Error': 'text-red-700',
         'Initializing...': 'text-gray-500',
