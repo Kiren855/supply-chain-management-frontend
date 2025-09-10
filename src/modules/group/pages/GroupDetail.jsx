@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom"; // 1. Import useNavigate
+import { useParams, useNavigate } from "react-router-dom";
 import groupService from "@/modules/group/service/groupService";
-import { FaUsers, FaPlus, FaEdit, FaSave, FaTimes, FaTrash, FaArrowLeft } from "react-icons/fa"; // 2. Import FaArrowLeft
+import { FaUsers, FaPlus, FaEdit, FaSave, FaTimes, FaTrash, FaArrowLeft } from "react-icons/fa";
 import AddRoleModal from "../components/AddRoleModal";
 import AddUserModal from "../components/AddUserModal";
+import ConfirmationModal from "@/components/common/ConfirmationModal";
+import { useToast } from "@/contexts/ToastContext"; // 1. Import useToast
 
 // Component Spinner để hiển thị khi loading
 const Spinner = () => (
@@ -14,7 +16,8 @@ const Spinner = () => (
 
 export default function GroupDetail() {
     const { groupId } = useParams();
-    const navigate = useNavigate(); // 3. Khởi tạo navigate
+    const navigate = useNavigate();
+    const { addToast } = useToast(); // 2. Khởi tạo hook
     const [group, setGroup] = useState(null);
     const [activeTab, setActiveTab] = useState("roles");
     const [loading, setLoading] = useState(true);
@@ -36,6 +39,14 @@ export default function GroupDetail() {
     const [usersTotalPages, setUsersTotalPages] = useState(1);
     const [usersTotalElements, setUsersTotalElements] = useState(0);
     const [selectedUsersToDelete, setSelectedUsersToDelete] = useState([]);
+
+    const [confirmationState, setConfirmationState] = useState({
+        isOpen: false,
+        title: '',
+        message: '',
+        onConfirm: () => { },
+        isConfirming: false,
+    });
 
     const fetchGroupRoles = async (page = 0) => {
         try {
@@ -109,38 +120,82 @@ export default function GroupDetail() {
             prev.includes(roleId) ? prev.filter((id) => id !== roleId) : [...prev, roleId]
         );
     };
-    const handleDeleteRoles = async () => {
+    const handleDeleteRoles = () => {
         if (selectedRolesToDelete.length === 0) return;
-        try {
-            await groupService.removeRoles(groupId, { roles: selectedRolesToDelete });
-            setSelectedRolesToDelete([]);
-            if (roles.length === selectedRolesToDelete.length && rolesPage > 0) {
-                fetchGroupRoles(rolesPage - 1);
-            } else {
-                fetchGroupRoles(rolesPage);
+        setConfirmationState({
+            isOpen: true,
+            title: 'Remove Roles',
+            message: `Are you sure you want to remove ${selectedRolesToDelete.length} selected role(s) from this group?`,
+            onConfirm: async () => {
+                setConfirmationState(prev => ({ ...prev, isConfirming: true }));
+                try {
+                    await groupService.removeRoles(groupId, { roles: selectedRolesToDelete });
+                    setSelectedRolesToDelete([]);
+                    if (roles.length === selectedRolesToDelete.length && rolesPage > 0) {
+                        fetchGroupRoles(rolesPage - 1);
+                    } else {
+                        fetchGroupRoles(rolesPage);
+                    }
+                    addToast('Roles removed successfully', 'success');
+                } catch (error) {
+                    console.error("Failed to delete roles:", error);
+                    addToast('Failed to remove roles', 'error');
+                } finally {
+                    setConfirmationState({ isOpen: false });
+                }
             }
-        } catch (error) {
-            console.error("Failed to delete roles:", error);
-        }
+        });
     };
     const handleSelectUserToDelete = (userId) => {
         setSelectedUsersToDelete((prev) =>
             prev.includes(userId) ? prev.filter((id) => id !== userId) : [...prev, userId]
         );
     };
-    const handleDeleteUsers = async () => {
+    const handleDeleteUsers = () => {
         if (selectedUsersToDelete.length === 0) return;
-        try {
-            await groupService.removeUsers(groupId, { users: selectedUsersToDelete });
-            setSelectedUsersToDelete([]);
-            if (users.length === selectedUsersToDelete.length && usersPage > 0) {
-                fetchGroupUsers(usersPage - 1);
-            } else {
-                fetchGroupUsers(usersPage);
+        setConfirmationState({
+            isOpen: true,
+            title: 'Remove Users',
+            message: `Are you sure you want to remove ${selectedUsersToDelete.length} selected user(s) from this group?`,
+            onConfirm: async () => {
+                setConfirmationState(prev => ({ ...prev, isConfirming: true }));
+                try {
+                    await groupService.removeUsers(groupId, { users: selectedUsersToDelete });
+                    setSelectedUsersToDelete([]);
+                    if (users.length === selectedUsersToDelete.length && usersPage > 0) {
+                        fetchGroupUsers(usersPage - 1);
+                    } else {
+                        fetchGroupUsers(usersPage);
+                    }
+                    addToast('Users removed successfully', 'success');
+                } catch (error) {
+                    console.error("Failed to delete users:", error);
+                    addToast('Failed to remove users', 'error');
+                } finally {
+                    setConfirmationState({ isOpen: false });
+                }
             }
-        } catch (error) {
-            console.error("Failed to delete users:", error);
-        }
+        });
+    };
+    const handleDeleteGroup = () => {
+        setConfirmationState({
+            isOpen: true,
+            title: 'Delete Group',
+            message: `Are you sure you want to delete the group "${group?.group_name}"?`,
+            onConfirm: async () => {
+                setConfirmationState(prev => ({ ...prev, isConfirming: true }));
+                try {
+                    await groupService.delete(groupId);
+                    setConfirmationState({ isOpen: false });
+                    addToast('Group deleted successfully', 'success');
+                    navigate('/groups');
+                } catch (error) {
+                    console.error("Failed to delete group:", error);
+                    addToast('Failed to delete the group', 'error');
+                    setConfirmationState(prev => ({ ...prev, isConfirming: false }));
+                }
+            }
+        });
     };
 
 
@@ -189,9 +244,18 @@ export default function GroupDetail() {
                                 </button>
                             </>
                         ) : (
-                            <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
-                                <FaEdit />
-                            </button>
+                            <>
+                                <button onClick={() => setIsEditing(true)} className="flex items-center gap-2 px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition">
+                                    <FaEdit />
+                                </button>
+
+                                <button
+                                    onClick={handleDeleteGroup}
+                                    className="flex items-center gap-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+                                >
+                                    <FaTrash />
+                                </button>
+                            </>
                         )}
                     </div>
                 </div>
@@ -372,12 +436,21 @@ export default function GroupDetail() {
                 onSuccess={handleAddRoleSuccess}
             />
 
-            {/* Render modal thêm user */}
             <AddUserModal
                 isOpen={isAddUserModalOpen}
                 onClose={() => setIsAddUserModalOpen(false)}
                 groupId={groupId}
                 onSuccess={handleAddUserSuccess}
+            />
+
+            {/* 4. RENDER MODAL CHUNG */}
+            <ConfirmationModal
+                isOpen={confirmationState.isOpen}
+                title={confirmationState.title}
+                message={confirmationState.message}
+                isConfirming={confirmationState.isConfirming}
+                onConfirm={confirmationState.onConfirm}
+                onClose={() => setConfirmationState({ isOpen: false })}
             />
         </>
     );

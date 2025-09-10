@@ -37,7 +37,12 @@ const API_ENDPOINTS = {
     },
     ROLE: {
         LIST: "http://localhost:9000/identity/api/v1/roles",
-    }
+    },
+    LOGGING: {
+        GET_LATEST: "http://localhost:9000/logging/api/v1/logs/latest",
+        GET_OLDER: "http://localhost:9000/logging/api/v1/logs/older",
+        EXPORT_CSV: "http://localhost:9000/logging/api/v1/logs/export",
+    },
 };
 
 export default API_ENDPOINTS;
