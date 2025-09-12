@@ -14,7 +14,12 @@ import UserDetailPage from "@/modules/user/pages/UserDetailPage";
 import GroupsPage from "@/modules/group/pages/GroupsPage";
 import GroupDetail from "@/modules/group/pages/GroupDetail";
 import CreateGroupPage from "@/modules/group/pages/CreateGroupPage";
-import RealtimeLogsPage from "@/modules/logging/pages/RealtimeLogsPage"; // 1. Import trang mới
+import RealtimeLogsPage from "@/modules/logging/pages/RealtimeLogsPage";
+import ProductsPage from "@/modules/product-catalog/pages/ProductPage"; // 1. Import trang danh sách sản phẩm
+
+// Placeholder pages for product module
+const CreateProductPage = () => <div className="p-8"><h1 className="text-2xl">Create New Product Page</h1></div>;
+const ProductDetailPage = () => <div className="p-8"><h1 className="text-2xl">Product Detail Page</h1></div>;
 
 
 export default function AppRoutes() {
@@ -38,7 +43,11 @@ export default function AppRoutes() {
                         <Route path="groups/create" element={<CreateGroupPage />} />
                         <Route path="groups/:groupId" element={<GroupDetail />} />
 
-                        {/* 2. Thêm route cho trang Activity Logs */}
+                        {/* 2. Thêm các route cho Product Catalog */}
+                        <Route path="products" element={<ProductsPage />} />
+                        <Route path="products/create" element={<CreateProductPage />} />
+                        <Route path="products/:productId" element={<ProductDetailPage />} />
+
                         <Route path="realtime-logs" element={<RealtimeLogsPage />} />
                     </Route>
                 </Route>

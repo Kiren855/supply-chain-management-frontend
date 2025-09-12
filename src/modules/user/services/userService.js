@@ -9,6 +9,11 @@ const userService = {
         return data;
     },
 
+    addUser: async (groupId, userId) => {
+        const { data } = await apiClient.post(API_ENDPOINTS.GROUP.ADD_USER(groupId, userId));
+        return data;
+    },
+
     getUserRoles: async (userId) => {
         const { data } = await apiClient.get(`${API_ENDPOINTS.USER.ROLES(userId)}`);
         return data;

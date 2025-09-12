@@ -1,21 +1,16 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
     ChevronLeftIcon,
     ChevronRightIcon,
     ChevronDownIcon,
     ChevronUpIcon,
-    HomeIcon,
-    UsersIcon,
-    CubeIcon,
-    BuildingStorefrontIcon,
-    ClockIcon,
-    Cog6ToothIcon,
-
 } from "@heroicons/react/24/outline";
-import { NavLink } from "react-router-dom";
-import { FaTachometerAlt, FaUsers, FaLayerGroup, FaHistory } from "react-icons/fa";
+import { NavLink, useLocation } from "react-router-dom";
+import { FaTachometerAlt, FaUsers, FaLayerGroup, FaHistory, FaWarehouse, FaCube } from "react-icons/fa";
 
+// 1. CẤU TRÚC LẠI MENU ĐỂ NHẤT QUÁN
 const menuItems = [
+    { name: "Dashboard", path: "/", icon: FaTachometerAlt, exact: true },
     {
         name: "User Management",
         icon: FaUsers,
@@ -26,23 +21,37 @@ const menuItems = [
     },
     {
         name: "Warehouse Management",
-        icon: BuildingStorefrontIcon,
+        icon: FaWarehouse,
         children: [
-            { name: "Warehouses", path: "warehouses", icon: BuildingStorefrontIcon },
+            { name: "Warehouses", path: "warehouses", icon: FaWarehouse },
         ],
     },
     {
         name: "Product Management",
-        icon: CubeIcon,
+        icon: FaCube,
         children: [
-            { name: "Products", path: "products", icon: CubeIcon },
+            { name: "Products", path: "products", icon: FaCube },
         ],
     },
+    { name: "Activity Logs", path: "realtime-logs", icon: FaHistory },
 ];
+
 
 export default function Sidebar() {
     const [collapsed, setCollapsed] = useState(false);
     const [openMenus, setOpenMenus] = useState({});
+    const location = useLocation();
+
+    // Tự động mở menu cha khi một menu con được active
+    useEffect(() => {
+        const activeMenu = menuItems.find(menu =>
+            menu.children?.some(child => location.pathname.startsWith(`/${child.path}`))
+        );
+        if (activeMenu) {
+            setOpenMenus(prev => ({ ...prev, [activeMenu.name]: true }));
+        }
+    }, [location.pathname]);
+
 
     const handleToggleMenu = (menuName) => {
         setOpenMenus((prev) => ({
@@ -52,56 +61,62 @@ export default function Sidebar() {
     };
 
     const navLinkClass = ({ isActive }) =>
-        `flex items-center px-6 py-3 mt-4 transition-colors duration-300 transform ${isActive
-            ? "text-gray-700 bg-gray-200"
-            : "text-gray-600 hover:bg-gray-200 hover:text-gray-700"
+        `flex items-center px-4 py-2.5 rounded-lg transition-colors duration-200
+        ${isActive
+            ? "bg-blue-200 font-semibold text-blue-800"
+            : "text-gray-600 hover:bg-blue-100 hover:text-gray-800"
         }`;
 
     return (
-        <div className={`bg-gradient-to-b from-blue-50 to-white border-r border-gray-200 min-h-screen flex flex-col transition-all duration-300
-        ${collapsed ? "min-w-[4rem] w-[4rem]" : "min-w-[16rem] w-[16rem]"} flex-shrink-0 shadow-lg`}>
-            <div className="flex items-center justify-between p-6 border-b border-gray-200">
-                {!collapsed && <span className="text-2xl font-bold text-blue-600 tracking-wide">SCM</span>}
-                <button onClick={() => setCollapsed(!collapsed)} className="focus:outline-none">
+        <div className={`bg-white border-r border-gray-200 min-h-screen flex flex-col transition-all duration-300
+        ${collapsed ? "w-20" : "w-64"} flex-shrink-0 shadow-sm`}>
+            <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
+                {!collapsed && <span className="text-xl font-bold text-blue-600">SCM</span>}
+                <button onClick={() => setCollapsed(!collapsed)} className="p-2 rounded-full hover:bg-gray-200 focus:outline-none">
                     {collapsed ? <ChevronRightIcon className="w-6 h-6 text-gray-600" /> : <ChevronLeftIcon className="w-6 h-6 text-gray-600" />}
                 </button>
             </div>
 
-            <nav className="flex-1 p-4 space-y-2">
+            <nav className="flex-1 p-2 space-y-1">
                 {menuItems.map((menu) => (
-                    <div key={menu.name}>
-                        <button
-                            className={`w-full flex items-center px-4 py-2 rounded-lg hover:bg-blue-100 transition-colors
-                                ${openMenus[menu.name] ? "bg-blue-100 font-semibold text-blue-600" : "text-gray-700"}
-                                ${collapsed ? "justify-center" : ""}
-                            `}
-                            onClick={() => handleToggleMenu(menu.name)}
-                        >
-                            <menu.icon className="w-5 h-5 mr-3" />
-                            {!collapsed && (
-                                <>
-                                    <span className="flex-1 text-left">{menu.name}</span>
-                                    {openMenus[menu.name] ? (
-                                        <ChevronUpIcon className="w-4 h-4" />
-                                    ) : (
-                                        <ChevronDownIcon className="w-4 h-4" />
-                                    )}
-                                </>
-                            )}
-                        </button>
+                    <div key={menu.name} className="relative group">
+                        {menu.children ? (
+                            // Menu có con
+                            <button
+                                className={`w-full flex items-center px-4 py-2.5 rounded-lg text-left hover:bg-blue-100 transition-colors
+                                    ${openMenus[menu.name] ? "font-semibold text-blue-700" : "text-gray-700"}
+                                    ${collapsed ? "justify-center" : ""}
+                                `}
+                                onClick={() => handleToggleMenu(menu.name)}
+                            >
+                                <menu.icon className={`w-5 h-5 flex-shrink-0 ${!collapsed ? "mr-3" : ""}`} />
+                                {!collapsed && (
+                                    <>
+                                        <span className="flex-1">{menu.name}</span>
+                                        {openMenus[menu.name] ? <ChevronUpIcon className="w-4 h-4" /> : <ChevronDownIcon className="w-4 h-4" />}
+                                    </>
+                                )}
+                            </button>
+                        ) : (
+                            // Menu không có con (link trực tiếp)
+                            <NavLink to={menu.path} className={navLinkClass} end={menu.exact}>
+                                <menu.icon className={`w-5 h-5 flex-shrink-0 ${!collapsed ? "mr-3" : ""}`} />
+                                {!collapsed && <span>{menu.name}</span>}
+                            </NavLink>
+                        )}
+
                         {/* Sub menu */}
-                        {!collapsed && openMenus[menu.name] && (
-                            <div className="ml-8 mt-1 space-y-1">
+                        {menu.children && (
+                            // 2. CẢI TIẾN HIỂN THỊ KHI THU GỌN
+                            <div className={`
+                                ${collapsed
+                                    ? 'absolute left-full top-0 w-48 ml-2 p-2 bg-white rounded-lg shadow-xl hidden group-hover:block'
+                                    : `pl-8 pr-2 pt-1 space-y-1 ${openMenus[menu.name] ? 'block' : 'hidden'}`
+                                }
+                            `}>
                                 {menu.children.map((child) => (
-                                    <NavLink
-                                        key={child.name}
-                                        to={child.path}
-                                        className={({ isActive }) =>
-                                            `flex items-center px-3 py-2 rounded-lg hover:bg-blue-50 transition-colors
-                                            ${isActive ? "bg-blue-200 font-semibold text-blue-700" : "text-gray-600"}`
-                                        }
-                                    >
-                                        <child.icon className="w-4 h-4 mr-2" />
+                                    <NavLink key={child.name} to={child.path} className={navLinkClass}>
+                                        <child.icon className="w-4 h-4 mr-3" />
                                         <span>{child.name}</span>
                                     </NavLink>
                                 ))}
@@ -109,16 +124,6 @@ export default function Sidebar() {
                         )}
                     </div>
                 ))}
-                <div className="border-t border-gray-200 my-4"></div>
-                <NavLink to="/" className={navLinkClass} end>
-                    <FaTachometerAlt className="w-6 h-6" />
-                    <span className="mx-4">Dashboard</span>
-                </NavLink>
-
-                <NavLink to="realtime-logs" className={navLinkClass}>
-                    <FaHistory className="w-6 h-6" />
-                    <span className="mx-4">Activity Logs</span>
-                </NavLink>
             </nav>
         </div>
     );

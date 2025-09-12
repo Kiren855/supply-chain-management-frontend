@@ -43,6 +43,14 @@ const API_ENDPOINTS = {
         GET_OLDER: "http://localhost:9000/logging/api/v1/logs/older",
         EXPORT_CSV: "http://localhost:9000/logging/api/v1/logs/export",
     },
+    PRODUCT: {
+        LIST: "http://localhost:9000/product/api/v1/products",
+        CREATE: "http://localhost:9000/product/api/v1/products",
+        DETAIL: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
+        UPDATE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
+        DELETE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
+
+    }
 };
 
 export default API_ENDPOINTS;
