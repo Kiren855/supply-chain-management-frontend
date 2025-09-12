@@ -1,13 +1,32 @@
-// src/routes/PrivateRoute.jsx
+import { useEffect, useState } from "react";
 import { Navigate, Outlet } from "react-router-dom";
-import { tokenStore } from "../core/utils/tokenStore";
+import { tokenStore } from "@/core/utils/tokenStore";
+import { initAuth } from "@/core/services/authInit";
 
 export default function PrivateRoute() {
-    const token = tokenStore.get();
+    const [loading, setLoading] = useState(true);
+    const [isAuth, setIsAuth] = useState(false);
 
-    // Nếu chưa login, redirect về /login hoặc /register
-    if (!token) return <Navigate to="/register" replace />;
+    useEffect(() => {
+        const checkAuth = async () => {
+            const valid = await initAuth();
+            setIsAuth(valid);
+            setLoading(false);
+        };
+        checkAuth();
+    }, []);
 
-    // Nếu có token, render tất cả các route con
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                Loading...
+            </div>
+        );
+    }
+
+    if (!isAuth) {
+        return <Navigate to="/login" replace />;
+    }
+
     return <Outlet />;
 }
