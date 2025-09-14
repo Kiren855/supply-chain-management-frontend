@@ -115,7 +115,7 @@ export default function Sidebar() {
                                 }
                             `}>
                                 {menu.children.map((child) => (
-                                    <NavLink key={child.name} to={child.path} className={navLinkClass}>
+                                    <NavLink key={child.name} to={`/${child.path}`} className={navLinkClass}>
                                         <child.icon className="w-4 h-4 mr-3" />
                                         <span>{child.name}</span>
                                     </NavLink>

@@ -14,9 +14,11 @@ import UserDetailPage from "@/modules/user/pages/UserDetailPage";
 import GroupsPage from "@/modules/group/pages/GroupsPage";
 import GroupDetail from "@/modules/group/pages/GroupDetail";
 import CreateGroupPage from "@/modules/group/pages/CreateGroupPage";
-import RealtimeLogsPage from "@/modules/logging/pages/RealtimeLogsPage"; // 1. Import trang mới
+import RealtimeLogsPage from "@/modules/logging/pages/RealtimeLogsPage";
+import ProductPage from "@/modules/product-catalog/pages/ProductPage";
 import CreateProductPage from "@/modules/product-catalog/pages/CreateProductPage";
-import ProductPage from "@/modules/product-catalog/pages/productPage";
+import ProductDetailPage from "@/modules/product-catalog/pages/ProductDetailPage";
+import WarehouseListPage from "@/modules/warehouse-management/pages/WarehouseListPage";
 
 export default function AppRoutes() {
     return (
@@ -41,8 +43,9 @@ export default function AppRoutes() {
 
                         <Route path="products" element={<ProductPage />} />
                         <Route path="products/create" element={<CreateProductPage />} />
+                        <Route path="products/:productId" element={<ProductDetailPage />} />
 
-                        {/* 2. Thêm route cho trang Activity Logs */}
+                        <Route path="warehouses" element={<WarehouseListPage />} />
                         <Route path="realtime-logs" element={<RealtimeLogsPage />} />
                     </Route>
                 </Route>

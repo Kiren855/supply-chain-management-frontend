@@ -1,3 +1,5 @@
+import { UPDATE } from "react-admin";
+
 const API_ENDPOINTS = {
     AUTH: {
         REGISTER: "http://localhost:9000/identity/api/v1/auth/root/register",
@@ -49,6 +51,11 @@ const API_ENDPOINTS = {
         DETAIL: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
         UPDATE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
         DELETE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
+        GET_PACKAGES: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages`,
+        DELETE_PACKAGE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages`,
+        UPDATE_PACKAGE: (productId, packageId) => `http://localhost:9000/product/api/v1/products/${productId}/packages/${packageId}`,
+        CREATE_PACKAGE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages`,
+
 
     },
     CATEGORY: {
@@ -56,7 +63,21 @@ const API_ENDPOINTS = {
         CREATE: "http://localhost:9000/product/api/v1/categories",
         GET_ROOT: "http://localhost:9000/product/api/v1/categories/root",
         GET_CHILDREN: (categoryId) => `http://localhost:9000/product/api/v1/categories/${categoryId}/children`,
-    }
+    },
+
+    WAREHOUSE: {
+        LIST: "http://localhost:9000/warehouse/api/v1/warehouses",
+        CREATE: "http://localhost:9000/warehouse/api/v1/warehouses",
+        UPDATE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
+        DELETE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
+    },
+
+    ZONE: {
+        LIST: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones`,
+        CREATE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones`,
+        UPDATE: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
+        DELETE: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
+    },
 };
 
 export default API_ENDPOINTS;

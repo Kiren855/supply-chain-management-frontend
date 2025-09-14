@@ -56,6 +56,17 @@ const productService = {
         return data;
     },
 
+    /**
+     * Cập nhật thông tin sản phẩm.
+     * @param {string|number} productId - ID của sản phẩm.
+     * @param {object} payload - Dữ liệu cần cập nhật.
+     * @returns {Promise<any>}
+     */
+    update: async (productId, payload) => {
+        const { data } = await apiClient.patch(API_ENDPOINTS.PRODUCT.UPDATE(productId), payload);
+        return data;
+    },
+
     // === CATEGORY APIs ===
 
     /**
@@ -100,6 +111,37 @@ const productService = {
         const { data } = await apiClient.get(API_ENDPOINTS.CATEGORY.GET_CHILDREN(categoryId));
         return data;
     },
+
+    getPackages: async (productId, pageNumber, pageSize) => {
+        const { data } = await apiClient.get(API_ENDPOINTS.PRODUCT.GET_PACKAGES(productId), {
+            params: { page: pageNumber, size: pageSize }
+        });
+        return data;
+    },
+
+    createPackage: async (productId, payload) => {
+        const { data } = await apiClient.post(API_ENDPOINTS.PRODUCT.CREATE_PACKAGE(productId), payload);
+        return data;
+    },
+
+    updatePackage: async (productId, packageId, payload) => {
+        const { data } = await apiClient.patch(API_ENDPOINTS.PRODUCT.UPDATE_PACKAGE(productId, packageId), payload);
+        return data;
+    },
+
+    /**
+     * Xóa nhiều package cùng lúc bằng cách gửi một mảng ID trong body.
+     * @param {string|number} productId - ID của sản phẩm cha.
+     * @param {number[]} packageIds - Mảng các ID của package cần xóa.
+     * @returns {Promise<any>}
+     */
+    deletePackages: async (productId, packageIds) => {
+        // API client (axios) gửi body của request DELETE trong thuộc tính `data`
+        const { data } = await apiClient.delete(API_ENDPOINTS.PRODUCT.DELETE_PACKAGE(productId), {
+            data: { package_ids: packageIds }
+        });
+        return data;
+    }
 };
 
 export default productService;
