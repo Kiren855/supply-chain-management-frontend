@@ -50,6 +50,12 @@ const API_ENDPOINTS = {
         UPDATE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
         DELETE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
 
+    },
+    CATEGORY: {
+        LIST: "http://localhost:9000/product/api/v1/categories",
+        CREATE: "http://localhost:9000/product/api/v1/categories",
+        GET_ROOT: "http://localhost:9000/product/api/v1/categories/root",
+        GET_CHILDREN: (categoryId) => `http://localhost:9000/product/api/v1/categories/${categoryId}/children`,
     }
 };
 

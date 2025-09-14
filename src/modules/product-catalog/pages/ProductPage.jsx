@@ -83,9 +83,9 @@ export default function ProductsPage() {
                             products.map((product, idx) => (
                                 <tr key={product.id} className="hover:bg-blue-50 cursor-pointer transition" onDoubleClick={() => handleRowDoubleClick(product)}>
                                     <td className="px-6 py-4 text-sm text-gray-700">{page * size + idx + 1}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-800 font-medium">{product.product_name}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-600 font-mono">{product.product_sku}</td>
-                                    <td className="px-6 py-4 text-sm text-gray-700">{product.category_name}</td>
+                                    <td className="px-6 py-4 text-left text-sm text-gray-800 font-medium">{product.product_name}</td>
+                                    <td className="px-6 py-4 text-left text-sm text-gray-600 font-mono">{product.product_sku}</td>
+                                    <td className="px-6 py-4 text-left text-sm text-gray-700">{product.category_name}</td>
                                     <td className="px-6 py-4 text-center text-sm text-gray-700">{product.unit}</td>
                                     <td className="px-6 py-4 text-center text-sm text-gray-700"><StatusBadge status={product.status} /></td>
                                 </tr>
