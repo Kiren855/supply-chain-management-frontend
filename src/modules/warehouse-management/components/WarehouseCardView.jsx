@@ -1,7 +1,22 @@
+import React from 'react';
 import { motion } from 'framer-motion';
 import { FaMapMarkerAlt, FaCalendarPlus, FaCalendarCheck, FaWarehouse } from 'react-icons/fa';
 
-// 1. Bảng màu hiện đại và hàm tạo màu nhấn
+// Component Badge cho Status
+const StatusBadge = ({ status }) => {
+    const statusStyles = {
+        ACTIVE: 'bg-green-100 text-green-800',
+        INACTIVE: 'bg-red-100 text-red-800',
+    };
+    const text = status === 'ACTIVE' ? 'Active' : 'Inactive';
+    return (
+        <span className={`px-2.5 py-0.5 text-xs font-semibold rounded-full ${statusStyles[status] || 'bg-gray-100 text-gray-800'}`}>
+            {text}
+        </span>
+    );
+};
+
+// Bảng màu hiện đại và hàm tạo màu nhấn
 const colorPalette = [
     { bg: 'bg-blue-500', text: 'text-blue-800', ring: 'ring-blue-500' },
     { bg: 'bg-green-500', text: 'text-green-800', ring: 'ring-green-500' },
@@ -17,8 +32,7 @@ const getAccentColor = (id) => {
     return colorPalette[id % colorPalette.length];
 };
 
-
-// 1. Cập nhật hàm định dạng để trả về một chuỗi duy nhất
+// Hàm định dạng ngày giờ
 const formatDateTime = (isoString) => {
     if (!isoString) return 'N/A';
     try {
@@ -34,7 +48,7 @@ const formatDateTime = (isoString) => {
     }
 };
 
-// 2. Skeleton loader được cập nhật để khớp với layout mới
+// Skeleton loader khớp với layout mới
 const CardSkeleton = () => (
     <div className="bg-white rounded-xl shadow-md border animate-pulse overflow-hidden">
         <div className="h-24 bg-gray-200"></div>
@@ -47,7 +61,6 @@ const CardSkeleton = () => (
         </div>
     </div>
 );
-
 
 export default function WarehouseCardView({ warehouses, isLoading, onRowDoubleClick }) {
     if (isLoading) {
@@ -62,7 +75,6 @@ export default function WarehouseCardView({ warehouses, isLoading, onRowDoubleCl
         return <div className="p-8 text-center text-gray-500 bg-white rounded-2xl shadow-lg">No warehouses found.</div>;
     }
 
-
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {warehouses.map((wh, index) => {
@@ -71,7 +83,7 @@ export default function WarehouseCardView({ warehouses, isLoading, onRowDoubleCl
                 return (
                     <motion.div
                         key={wh.id}
-                        className={`bg-white rounded-xl shadow-lg border border-gray-200 cursor-pointer overflow-hidden
+                        className={`relative bg-white rounded-xl shadow-lg border border-gray-200 cursor-pointer overflow-hidden
                                     hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 group
                                     hover:ring-2 hover:ring-offset-2 ${accent.ring}`}
                         onDoubleClick={() => onRowDoubleClick(wh)}
@@ -79,21 +91,30 @@ export default function WarehouseCardView({ warehouses, isLoading, onRowDoubleCl
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
                     >
-                        {/* 3. Header với màu nhấn và icon nền */}
-                        <div className={`relative p-5 ${accent.bg} text-white`}>
-                            <FaWarehouse className="absolute right-2 top-1/2 -translate-y-1/2 text-white/10 text-7xl" />
-                            <h3 className="text-xl font-bold truncate relative z-10">{wh.warehouse_name}</h3>
-                            <p className="text-sm font-mono text-white/80 relative z-10">{wh.warehouse_code}</p>
+                        {/* Status Badge được thêm vào đây */}
+                        <div className="absolute top-3 right-3 z-20">
+                            <StatusBadge status={wh.status} />
                         </div>
 
-                        {/* 4. Phần thân thẻ với thông tin chi tiết */}
+                        {/* Header với màu nhấn và icon nền */}
+                        <div className={`relative p-5 ${accent.bg} text-white`}>
+                            {/* Di chuyển icon sang trái bằng cách đổi 'right-2' thành 'left-2' */}
+                            <FaWarehouse className="absolute left-2 top-1/2 -translate-y-1/2 text-white/10 text-7xl" />
+
+                            {/* Thêm padding-left (pl-20) để tạo không gian cho icon */}
+                            <div className="relative z-10 pl-20">
+                                <h3 className="text-xl font-bold truncate">{wh.warehouse_name}</h3>
+                                <p className="text-sm font-mono text-white/80">{wh.warehouse_code}</p>
+                            </div>
+                        </div>
+
+                        {/* Phần thân thẻ với thông tin chi tiết */}
                         <div className="p-5">
                             <div className="flex items-start gap-3 text-sm text-gray-700 mb-5">
                                 <FaMapMarkerAlt className={`mt-1 ${accent.text} flex-shrink-0`} />
                                 <span>{wh.location}</span>
                             </div>
                             <div className="border-t pt-4 flex justify-between text-xs text-gray-500">
-                                {/* 2. Hiển thị ngày và giờ trên cùng 1 dòng */}
                                 <div className="flex items-center gap-1.5">
                                     <FaCalendarPlus className="text-green-500" />
                                     <span>{formatDateTime(wh.create_at)}</span>
