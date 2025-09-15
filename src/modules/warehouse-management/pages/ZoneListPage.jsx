@@ -152,7 +152,7 @@ export default function ZoneListPage() {
                         {/* 4. Cập nhật tiêu đề */}
                         {warehouseInfo ? (
                             <>
-                                <h1 className="text-3xl font-bold text-gray-800">{warehouseInfo.warehouse_name}</h1>
+                                <h1 className="text-3xl text-left font-bold text-gray-800">{warehouseInfo.warehouse_name}</h1>
                                 <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
                                     <span className="font-mono bg-gray-200 px-2 py-0.5 rounded">{warehouseInfo.warehouse_code}</span>
                                     <div className="flex items-center gap-1.5">

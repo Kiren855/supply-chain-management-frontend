@@ -7,7 +7,7 @@ import warehouseService from '../service/warehouseService';
 import Pagination from '@/components/common/Pagination';
 import WarehouseListView from '../components/WarehouseListView';
 import WarehouseCardView from '../components/WarehouseCardView';
-import CreateWarehouseModal from '../components/CreateWarehouseModal'; // 1. Import modal
+import CreateWarehouseModal from '../components/CreateWarehouseModal'; // Import modal mới
 
 const listPageSizes = [10, 20, 50];
 const cardPageSizes = [9, 12, 24];
@@ -78,10 +78,11 @@ export default function WarehouseListPage() {
 
     // 2. Thêm state để quản lý modal
     const [isModalOpen, setIsModalOpen] = useState(false);
-
-    const debouncedKeyword = useDebounce(filters.keyword, 700);
     const { addToast } = useToast();
     const navigate = useNavigate();
+
+    // Thêm dòng bị thiếu để tạo debouncedKeyword
+    const debouncedKeyword = useDebounce(filters.keyword, 700);
 
     // 2. Hàm fetch data được đơn giản hóa
     const fetchData = useCallback(async (currentFilters) => {
@@ -152,6 +153,11 @@ export default function WarehouseListPage() {
 
     // 3. Biến để kiểm tra xem có filter nào đang được áp dụng không
     const isFilterActive = filters.keyword !== '' || filters.createdFrom !== '' || filters.createdTo !== '';
+
+    const handleWarehouseCreated = () => {
+        // Hàm này được gọi sau khi tạo kho thành công để tải lại dữ liệu
+        fetchData(filters);
+    };
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
@@ -258,7 +264,7 @@ export default function WarehouseListPage() {
             <CreateWarehouseModal
                 isOpen={isModalOpen}
                 onClose={() => setIsModalOpen(false)}
-                onSubmit={handleCreateSubmit}
+                onWarehouseCreated={handleWarehouseCreated}
             />
         </div>
     );
