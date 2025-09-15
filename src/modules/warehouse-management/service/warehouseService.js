@@ -35,6 +35,16 @@ const warehouseService = {
         const { data } = await apiClient.post(API_ENDPOINTS.WAREHOUSE.CREATE, warehouseData);
         return data;
     },
+
+    /**
+     * Lấy thông tin chi tiết của một kho hàng.
+     * @param {number} warehouseId - ID của kho hàng.
+     * @returns {Promise<any>}
+     */
+    getWarehouseById: async (warehouseId) => {
+        const { data } = await apiClient.get(API_ENDPOINTS.WAREHOUSE.GET_BY_ID(warehouseId));
+        return data;
+    },
 };
 
 export default warehouseService;

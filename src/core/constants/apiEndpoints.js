@@ -68,6 +68,7 @@ const API_ENDPOINTS = {
     WAREHOUSE: {
         LIST: "http://localhost:9000/warehouse/api/v1/warehouses",
         CREATE: "http://localhost:9000/warehouse/api/v1/warehouses",
+        GET_BY_ID: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
         UPDATE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
         DELETE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
     },

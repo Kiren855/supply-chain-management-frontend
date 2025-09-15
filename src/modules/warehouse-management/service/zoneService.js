@@ -60,3 +60,5 @@ const zoneService = {
         return data;
     },
 };
+
+export default zoneService;

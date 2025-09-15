@@ -1,28 +1,28 @@
 import { useState, useEffect, useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { FaPlus, FaList, FaTh, FaSearch, FaUndo } from 'react-icons/fa';
+import { useParams, useNavigate, Link } from 'react-router-dom';
+import { FaPlus, FaList, FaTh, FaSearch, FaUndo, FaArrowLeft, FaMapMarkerAlt } from 'react-icons/fa';
 import { useToast } from '@/contexts/ToastContext';
 import { motion } from 'framer-motion';
-import warehouseService from '../service/warehouseService';
+import zoneService from '../service/zoneService';
+import warehouseService from '../service/warehouseService'; // 1. Import warehouseService
 import Pagination from '@/components/common/Pagination';
-import WarehouseListView from '../components/WarehouseListView';
-import WarehouseCardView from '../components/WarehouseCardView';
-import CreateWarehouseModal from '../components/CreateWarehouseModal'; // 1. Import modal
+import ZoneListView from '../components/ZoneListView';
+import ZoneCardView from '../components/ZoneCardView';
+// import CreateZoneModal from '../components/CreateZoneModal'; // Sẽ thêm sau
 
-const listPageSizes = [10, 20, 50];
-const cardPageSizes = [9, 12, 24];
+const listPageSizes = [5, 10, 20, 50];
+const cardPageSizes = [3, 6, 9, 12, 24];
 
-// 1. Định nghĩa trạng thái filter ban đầu để dễ dàng reset
 const initialFiltersState = {
     keyword: '',
     createdFrom: '',
     createdTo: '',
+    zoneType: '', // Thêm filter cho zone type
     page: 0,
     size: listPageSizes[0],
     sort: 'creationTimestamp,desc',
 };
 
-// Custom hook để debounce giá trị
 function useDebounce(value, delay) {
     const [debouncedValue, setDebouncedValue] = useState(value);
     useEffect(() => {
@@ -32,6 +32,7 @@ function useDebounce(value, delay) {
     return debouncedValue;
 }
 
+// 1. Thêm đầy đủ code cho ViewModeToggle
 const ViewModeToggle = ({ viewMode, onViewModeChange }) => {
     return (
         <div className="flex items-center p-1 bg-gray-200 rounded-lg">
@@ -65,68 +66,61 @@ const ViewModeToggle = ({ viewMode, onViewModeChange }) => {
     );
 };
 
-
-export default function WarehouseListPage() {
-    const [warehouses, setWarehouses] = useState([]);
+export default function ZoneListPage() {
+    const { warehouseId } = useParams();
+    const navigate = useNavigate();
+    const [zones, setZones] = useState([]);
+    const [warehouseInfo, setWarehouseInfo] = useState(null); // 2. Thêm state để lưu thông tin kho
     const [isLoading, setIsLoading] = useState(true);
-
-    // Sử dụng state ban đầu đã định nghĩa
     const [filters, setFilters] = useState(initialFiltersState);
-
     const [viewMode, setViewMode] = useState('list');
     const [totalPages, setTotalPages] = useState(1);
-
-    // 2. Thêm state để quản lý modal
     const [isModalOpen, setIsModalOpen] = useState(false);
-
     const debouncedKeyword = useDebounce(filters.keyword, 700);
     const { addToast } = useToast();
-    const navigate = useNavigate();
 
-    // 2. Hàm fetch data được đơn giản hóa
+    // 3. useEffect để lấy thông tin kho mẹ
+    useEffect(() => {
+        const fetchWarehouseInfo = async () => {
+            try {
+                const response = await warehouseService.getWarehouseById(warehouseId);
+                setWarehouseInfo(response.result);
+            } catch (error) {
+                addToast("Could not fetch warehouse details.", "error");
+                navigate('/warehouses'); // Quay về trang trước nếu có lỗi
+            }
+        };
+        fetchWarehouseInfo();
+    }, [warehouseId, addToast, navigate]);
+
     const fetchData = useCallback(async (currentFilters) => {
         setIsLoading(true);
         try {
-            const response = await warehouseService.getWarehouses(currentFilters);
-            setWarehouses(response.result.content);
+            const response = await zoneService.getZones(warehouseId, currentFilters);
+            setZones(response.result.content);
             setTotalPages(response.result.totalPages);
         } catch (error) {
-            addToast("Could not fetch data. Please try again later.", "error");
-            setWarehouses([]);
+            addToast("Could not fetch zones. Please try again later.", "error");
+            setZones([]);
         } finally {
             setIsLoading(false);
         }
-    }, [addToast]);
+    }, [addToast, warehouseId]);
 
-    // 3. useEffect chính để fetch dữ liệu khi các tham số thay đổi
     useEffect(() => {
-        // Tạo một bản sao của filters và cập nhật keyword đã được debounce
         const currentFilters = { ...filters, keyword: debouncedKeyword };
         fetchData(currentFilters);
-    }, [debouncedKeyword, filters.createdFrom, filters.createdTo, filters.page, filters.size, filters.sort, fetchData]);
+    }, [debouncedKeyword, filters.createdFrom, filters.createdTo, filters.zoneType, filters.page, filters.size, filters.sort, fetchData]);
 
-    // 3. Hàm xử lý khi submit form tạo mới
-    const handleCreateSubmit = async (warehouseData) => {
-        try {
-            await warehouseService.createWarehouse(warehouseData);
-            addToast("Warehouse created successfully!", "success");
-            setIsModalOpen(false); // Đóng modal
-            fetchData(filters); // Tải lại dữ liệu để hiển thị kho mới
-        } catch (error) {
-            addToast(error.response?.data?.message || "Failed to create warehouse.", "error");
-        }
-    };
-
-    // 4. Hàm xử lý thay đổi chung cho các filter
     const handleFilterChange = (field, value) => {
         setFilters(prev => ({
             ...prev,
             [field]: value,
-            page: 0, // Reset về trang đầu tiên khi thay đổi bất kỳ filter nào
+            // Chỉ reset về trang 0 nếu thay đổi không phải là chính nó
+            page: field === 'page' ? value : 0,
         }));
     };
 
-    // 2. Hàm để reset tất cả các filter về trạng thái ban đầu
     const handleResetFilters = () => {
         setFilters(initialFiltersState);
         addToast("Filters have been reset.", "info");
@@ -136,56 +130,66 @@ export default function WarehouseListPage() {
         if (newMode === viewMode) return;
         setViewMode(newMode);
         const newSize = newMode === 'list' ? listPageSizes[0] : cardPageSizes[0];
-        // Khi đổi view, cũng reset luôn filter để tránh nhầm lẫn
-        setFilters({
-            ...initialFiltersState,
-            size: newSize,
-        });
+        setFilters(prev => ({ ...prev, size: newSize, page: 0 }));
     };
 
-    const handleRowDoubleClick = (warehouse) => {
-        // Sửa lại hàm này để navigate
-        navigate(`/warehouses/${warehouse.id}/zones`);
+    const handleRowDoubleClick = (zone) => {
+        addToast(`Double-clicked on zone: ${zone.zone_name}`, "info");
+        // Có thể navigate đến trang chi tiết của zone sau này
     };
 
     const currentPageSizes = viewMode === 'list' ? listPageSizes : cardPageSizes;
-
-    // 3. Biến để kiểm tra xem có filter nào đang được áp dụng không
-    const isFilterActive = filters.keyword !== '' || filters.createdFrom !== '' || filters.createdTo !== '';
+    const isFilterActive = filters.keyword !== '' || filters.createdFrom !== '' || filters.createdTo !== '' || filters.zoneType !== '';
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto space-y-6">
-                {/* Thanh điều khiển chính */}
                 <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800">Warehouse Management</h1>
+                    <div>
+                        <Link to="/warehouses" className="flex items-center gap-2 text-sm text-blue-600 hover:underline mb-2">
+                            <FaArrowLeft /> Back to Warehouses
+                        </Link>
+                        {/* 4. Cập nhật tiêu đề */}
+                        {warehouseInfo ? (
+                            <>
+                                <h1 className="text-3xl font-bold text-gray-800">{warehouseInfo.warehouse_name}</h1>
+                                <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                                    <span className="font-mono bg-gray-200 px-2 py-0.5 rounded">{warehouseInfo.warehouse_code}</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <FaMapMarkerAlt />
+                                        <span>{warehouseInfo.location}</span>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="space-y-2 animate-pulse">
+                                <div className="h-8 bg-gray-200 rounded w-64"></div>
+                                <div className="h-5 bg-gray-200 rounded w-80"></div>
+                            </div>
+                        )}
+                    </div>
+                    {/* 1. Xóa nút Create khỏi đây, chỉ giữ lại ViewModeToggle */}
                     <div className="flex items-center gap-4">
                         <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
-                        {/* 4. Cập nhật nút Create để mở modal */}
-                        <button
-                            onClick={() => setIsModalOpen(true)}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
-                        >
-                            <FaPlus /> Create
-                        </button>
                     </div>
                 </div>
 
-                {/* Thanh công cụ tìm kiếm và lọc */}
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-4 bg-white rounded-lg shadow-sm border">
-                    {/* Search Input */}
-                    <div className="relative lg:col-span-2">
+                {/* 2. Mở rộng grid lên 8 cột và thêm nút Create */}
+                <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-4 p-4 bg-white rounded-lg shadow-sm border">
+                    {/* Search Input (chiếm 3 cột) */}
+                    <div className="relative lg:col-span-3">
                         <label htmlFor="search-keyword" className="text-sm font-medium text-gray-700 mb-1 block">Search</label>
                         <FaSearch className="absolute left-3 bottom-3 text-gray-400" />
                         <input
                             id="search-keyword"
                             type="text"
-                            placeholder="By name or code..."
+                            placeholder="By zone name or code..."
                             value={filters.keyword}
-                            onChange={(e) => setFilters(prev => ({ ...prev, keyword: e.target.value }))}
+                            onChange={(e) => setFilters(prev => ({ ...prev, keyword: e.target.value, page: 0 }))}
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                         />
                     </div>
+
                     {/* Created From */}
                     <div>
                         <label htmlFor="created-from" className="text-sm font-medium text-gray-700 mb-1 block">Created From</label>
@@ -197,6 +201,7 @@ export default function WarehouseListPage() {
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                         />
                     </div>
+
                     {/* Created To */}
                     <div>
                         <label htmlFor="created-to" className="text-sm font-medium text-gray-700 mb-1 block">Created To</label>
@@ -209,26 +214,56 @@ export default function WarehouseListPage() {
                         />
                     </div>
 
-                    {/* 4. Nút Reset Filters - phiên bản icon nhỏ gọn */}
-                    <div className="flex items-end justify-end">
+                    {/* Filter by Type */}
+                    <div>
+                        <label htmlFor="zone-type" className="text-sm font-medium text-gray-700 mb-1 block">Zone Type</label>
+                        <select id="zone-type" value={filters.zoneType} onChange={(e) => handleFilterChange('zoneType', e.target.value)} className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition">
+                            <option value="">All Types</option>
+                            <option value="STORAGE">Storage</option>
+                            <option value="PICKING">Picking</option>
+                            <option value="DOCK">Dock</option>
+                            <option value="STAGING">Staging</option>
+                        </select>
+                    </div>
+
+                    {/* Nút Reset */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block invisible">Reset</label>
                         <button
                             onClick={handleResetFilters}
                             disabled={!isFilterActive}
                             title="Reset Filters"
-                            className={`flex items-center justify-center p-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white 
-                                        ${isFilterActive ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'} 
-                                        transition-all transform hover:scale-110`}
+                            className={`w-full flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg shadow-lg text-white 
+                                        ${isFilterActive ? 'bg-red-600 hover:bg-red-700 hover:shadow-xl' : 'bg-gray-400 cursor-not-allowed'} 
+                                        transition-all duration-300 transform hover:scale-105`}
                         >
                             <FaUndo />
+                            Reset
+                        </button>
+                    </div>
+
+                    {/* Nút Create Zone */}
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block invisible">Create</label>
+                        <button
+                            onClick={() => setIsModalOpen(true)}
+                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-sky-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                        >
+                            <FaPlus /> Create
                         </button>
                     </div>
                 </div>
 
-                {/* Hiển thị kết quả */}
                 {viewMode === 'list' ? (
-                    <WarehouseListView warehouses={warehouses} isLoading={isLoading} page={filters.page} size={filters.size} onRowDoubleClick={handleRowDoubleClick} />
+                    <ZoneListView
+                        zones={zones}
+                        isLoading={isLoading}
+                        page={filters.page}
+                        size={filters.size}
+                        onRowDoubleClick={handleRowDoubleClick}
+                    />
                 ) : (
-                    <WarehouseCardView warehouses={warehouses} isLoading={isLoading} onRowDoubleClick={handleRowDoubleClick} />
+                    <ZoneCardView zones={zones} isLoading={isLoading} onRowDoubleClick={handleRowDoubleClick} />
                 )}
 
                 {/* Phân trang và các tùy chọn */}
@@ -247,19 +282,13 @@ export default function WarehouseListPage() {
                         <select id="sort-select" value={filters.sort} onChange={(e) => handleFilterChange('sort', e.target.value)} className="border border-gray-300 rounded-md px-2 py-1 focus:outline-none focus:ring-1 focus:ring-blue-500">
                             <option value="creationTimestamp,desc">Newest</option>
                             <option value="creationTimestamp,asc">Oldest</option>
-                            <option value="warehouseName,asc">Name (A-Z)</option>
-                            <option value="warehouseName,desc">Name (Z-A)</option>
+                            <option value="zone_name,asc">Name (A-Z)</option>
+                            <option value="zone_name,desc">Name (Z-A)</option>
                         </select>
                     </div>
                 </div>
             </div>
-
-            {/* 5. Thêm component Modal vào cuối */}
-            <CreateWarehouseModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSubmit={handleCreateSubmit}
-            />
+            {/* <CreateZoneModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={...} /> */}
         </div>
     );
 }
