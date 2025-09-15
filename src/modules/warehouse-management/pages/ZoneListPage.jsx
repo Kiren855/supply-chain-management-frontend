@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FaPlus, FaList, FaTh, FaSearch, FaUndo, FaArrowLeft, FaMapMarkerAlt } from 'react-icons/fa';
+import { FaPlus, FaList, FaTh, FaSearch, FaUndo, FaArrowLeft, FaMapMarkerAlt, FaPencilAlt } from 'react-icons/fa';
 import { useToast } from '@/contexts/ToastContext';
 import { motion } from 'framer-motion';
 import zoneService from '../service/zoneService';
@@ -8,6 +8,7 @@ import warehouseService from '../service/warehouseService'; // 1. Import warehou
 import Pagination from '@/components/common/Pagination';
 import ZoneListView from '../components/ZoneListView';
 import ZoneCardView from '../components/ZoneCardView';
+import UpdateWarehouseModal from '../components/UpdateWarehouseModal'; // Import modal mới
 // import CreateZoneModal from '../components/CreateZoneModal'; // Sẽ thêm sau
 
 const listPageSizes = [5, 10, 20, 50];
@@ -76,22 +77,23 @@ export default function ZoneListPage() {
     const [viewMode, setViewMode] = useState('list');
     const [totalPages, setTotalPages] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // State cho modal update
     const debouncedKeyword = useDebounce(filters.keyword, 700);
     const { addToast } = useToast();
 
-    // 3. useEffect để lấy thông tin kho mẹ
-    useEffect(() => {
-        const fetchWarehouseInfo = async () => {
-            try {
-                const response = await warehouseService.getWarehouseById(warehouseId);
-                setWarehouseInfo(response.result);
-            } catch (error) {
-                addToast("Could not fetch warehouse details.", "error");
-                navigate('/warehouses'); // Quay về trang trước nếu có lỗi
-            }
-        };
-        fetchWarehouseInfo();
+    const fetchWarehouseInfo = useCallback(async () => { // Bọc trong useCallback
+        try {
+            const response = await warehouseService.getWarehouseById(warehouseId);
+            setWarehouseInfo(response.result);
+        } catch (error) {
+            addToast("Could not fetch warehouse details.", "error");
+            navigate('/warehouses');
+        }
     }, [warehouseId, addToast, navigate]);
+
+    useEffect(() => {
+        fetchWarehouseInfo();
+    }, [fetchWarehouseInfo]);
 
     const fetchData = useCallback(async (currentFilters) => {
         setIsLoading(true);
@@ -138,6 +140,11 @@ export default function ZoneListPage() {
         // Có thể navigate đến trang chi tiết của zone sau này
     };
 
+    const handleWarehouseUpdated = () => {
+        // Tải lại thông tin kho sau khi cập nhật thành công
+        fetchWarehouseInfo();
+    };
+
     const currentPageSizes = viewMode === 'list' ? listPageSizes : cardPageSizes;
     const isFilterActive = filters.keyword !== '' || filters.createdFrom !== '' || filters.createdTo !== '' || filters.zoneType !== '';
 
@@ -168,8 +175,14 @@ export default function ZoneListPage() {
                             </div>
                         )}
                     </div>
-                    {/* 1. Xóa nút Create khỏi đây, chỉ giữ lại ViewModeToggle */}
                     <div className="flex items-center gap-4">
+                        {/* Thêm nút Update Warehouse */}
+                        <button
+                            onClick={() => setIsUpdateModalOpen(true)}
+                            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 transition-all"
+                        >
+                            <FaPencilAlt /> Update Info
+                        </button>
                         <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
                     </div>
                 </div>
@@ -288,6 +301,16 @@ export default function ZoneListPage() {
                     </div>
                 </div>
             </div>
+
+            {/* Thêm modal update vào cuối file */}
+            {warehouseInfo && (
+                <UpdateWarehouseModal
+                    isOpen={isUpdateModalOpen}
+                    onClose={() => setIsUpdateModalOpen(false)}
+                    warehouseData={warehouseInfo}
+                    onWarehouseUpdated={handleWarehouseUpdated}
+                />
+            )}
             {/* <CreateZoneModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={...} /> */}
         </div>
     );

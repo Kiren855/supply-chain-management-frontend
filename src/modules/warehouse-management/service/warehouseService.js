@@ -37,6 +37,17 @@ const warehouseService = {
     },
 
     /**
+     * Cập nhật thông tin kho hàng.
+     * @param {number} warehouseId - ID của kho hàng cần cập nhật.
+     * @param {object} warehouseData - Dữ liệu cập nhật.
+     * @returns {Promise<any>}
+     */
+    updateWarehouse: async (warehouseId, warehouseData) => {
+        const { data } = await apiClient.patch(API_ENDPOINTS.WAREHOUSE.UPDATE(warehouseId), warehouseData);
+        return data;
+    },
+
+    /**
      * Lấy thông tin chi tiết của một kho hàng.
      * @param {number} warehouseId - ID của kho hàng.
      * @returns {Promise<any>}
