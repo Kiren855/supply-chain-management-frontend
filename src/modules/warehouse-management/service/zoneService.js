@@ -16,13 +16,24 @@ const zoneService = {
     /**
      * Lấy danh sách các khu vực (zone) trong một kho.
      * @param {number} warehouseId - ID của kho.
-     * @param {object} params - Các tham số lọc và phân trang.
+     * @param {object} params - Các tham số lọc và phân trang (keyword, createdFrom, createdTo, zoneType, page, size, sort).
      * @returns {Promise<any>}
      */
     getZones: async (warehouseId, params) => {
         const { data } = await apiClient.get(API_ENDPOINTS.ZONE.LIST(warehouseId), {
             params: cleanParams(params)
         });
+        return data;
+    },
+
+    /**
+     * Lấy thông tin chi tiết của một khu vực.
+     * @param {number} warehouseId - ID của kho.
+     * @param {number} zoneId - ID của khu vực.
+     * @returns {Promise<any>}
+     */
+    getZoneById: async (warehouseId, zoneId) => {
+        const { data } = await apiClient.get(API_ENDPOINTS.ZONE.GET_BY_ID(warehouseId, zoneId));
         return data;
     },
 

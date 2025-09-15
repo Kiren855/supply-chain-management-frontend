@@ -76,6 +76,7 @@ const API_ENDPOINTS = {
     ZONE: {
         LIST: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones`,
         CREATE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones`,
+        GET_BY_ID: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
         UPDATE: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
         DELETE: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
     },
