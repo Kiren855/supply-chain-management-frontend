@@ -20,6 +20,7 @@ import CreateProductPage from "@/modules/product-catalog/pages/CreateProductPage
 import ProductDetailPage from "@/modules/product-catalog/pages/ProductDetailPage";
 import WarehouseListPage from "@/modules/warehouse-management/pages/WarehouseListPage";
 import ZoneListPage from '@/modules/warehouse-management/pages/ZoneListPage';
+import BinListPage from '@/modules/warehouse-management/pages/BinListPage';
 
 export default function AppRoutes() {
     return (
@@ -48,6 +49,7 @@ export default function AppRoutes() {
 
                         <Route path="warehouses" element={<WarehouseListPage />} />
                         <Route path="/warehouses/:warehouseId/zones" element={<ZoneListPage />} />
+                        <Route path="/warehouses/:warehouseId/zones/:zoneId" element={<BinListPage />} />
 
                         <Route path="realtime-logs" element={<RealtimeLogsPage />} />
                     </Route>

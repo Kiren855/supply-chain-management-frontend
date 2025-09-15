@@ -8,8 +8,8 @@ import warehouseService from '../service/warehouseService'; // 1. Import warehou
 import Pagination from '@/components/common/Pagination';
 import ZoneListView from '../components/ZoneListView';
 import ZoneCardView from '../components/ZoneCardView';
-import UpdateWarehouseModal from '../components/UpdateWarehouseModal'; // Import modal mới
-// import CreateZoneModal from '../components/CreateZoneModal'; // Sẽ thêm sau
+import UpdateWarehouseModal from '../components/UpdateWarehouseModal';
+import CreateZoneModal from '../components/CreateZoneModal'; // Import modal tạo zone
 
 const listPageSizes = [5, 10, 20, 50];
 const cardPageSizes = [3, 6, 9, 12, 24];
@@ -136,13 +136,28 @@ export default function ZoneListPage() {
     };
 
     const handleRowDoubleClick = (zone) => {
-        addToast(`Double-clicked on zone: ${zone.zone_name}`, "info");
-        // Có thể navigate đến trang chi tiết của zone sau này
+        // Chuyển hướng đến trang danh sách bin của zone được chọn
+        navigate(`/warehouses/${warehouseId}/zones/${zone.id}`);
     };
 
     const handleWarehouseUpdated = () => {
         // Tải lại thông tin kho sau khi cập nhật thành công
         fetchWarehouseInfo();
+    };
+
+    // Hàm xử lý việc tạo zone mới
+    const handleCreateZoneSubmit = async (zoneData) => {
+        try {
+            await zoneService.createZone(warehouseId, zoneData);
+            addToast('Zone created successfully!', 'success');
+            setIsModalOpen(false); // Đóng modal
+            fetchData(filters); // Tải lại danh sách zones
+        } catch (err) {
+            const message = err.response?.data?.message || 'Failed to create zone.';
+            addToast(message, 'error');
+            // Ném lỗi để component con có thể bắt và xử lý (ví dụ: không đóng modal)
+            throw new Error(message);
+        }
     };
 
     const currentPageSizes = viewMode === 'list' ? listPageSizes : cardPageSizes;
@@ -181,7 +196,12 @@ export default function ZoneListPage() {
                             onClick={() => setIsUpdateModalOpen(true)}
                             className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 transition-all"
                         >
-                            <FaPencilAlt /> Update Info
+                            <FaPencilAlt /> Update
+                        </button>
+                        <button
+                            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 transition-all"
+                        >
+                            <FaPencilAlt />Change status
                         </button>
                         <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
                     </div>
@@ -311,7 +331,11 @@ export default function ZoneListPage() {
                     onWarehouseUpdated={handleWarehouseUpdated}
                 />
             )}
-            {/* <CreateZoneModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} onSubmit={...} /> */}
+            <CreateZoneModal
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onSubmit={handleCreateZoneSubmit}
+            />
         </div>
     );
 }

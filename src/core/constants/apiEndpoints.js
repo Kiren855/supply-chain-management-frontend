@@ -80,6 +80,13 @@ const API_ENDPOINTS = {
         UPDATE: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
         DELETE: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
     },
+
+    BIN: {
+        LIST: (zoneId) => `http://localhost:9000/warehouse/api/v1/zones/${zoneId}/bins`,
+        CREATE: (zoneId) => `http://localhost:9000/warehouse/api/v1/zones/${zoneId}/bins`,
+        GET_BY_ID: (zoneId, binId) => `http://localhost:9000/warehouse/api/v1/zones/${zoneId}/bins/${binId}`,
+        UPDATE: (zoneId, binId) => `http://localhost:9000/warehouse/api/v1/zones/${zoneId}/bins/${binId}`,
+    },
 };
 
 export default API_ENDPOINTS;
