@@ -264,17 +264,21 @@ export default function BinListPage() {
                             className="w-full p-2 border rounded-lg"
                         />
                     </div>
-                    <div className="flex items-end">
+
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block invisible">Reset</label>
                         <Button
                             onClick={handleResetFilters}
                             disabled={!isFilterActive}
+                            title="Reset Filters"
                             variant="danger"
-                            className="w-full md:w-auto"
-                            title="Reset"
+                            className="w-full"
                         >
                             <FaUndo />
+                            Reset
                         </Button>
                     </div>
+
                     {/* Nút Create Bin nằm cùng hàng filter */}
                     <div className="flex items-end">
                         <Button

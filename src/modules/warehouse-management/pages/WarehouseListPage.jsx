@@ -93,6 +93,7 @@ export default function WarehouseListPage() {
             const response = await warehouseService.getWarehouses(currentFilters);
             setWarehouses(response.result.content);
             setTotalPages(response.result.totalPages);
+
         } catch (error) {
             addToast("Could not fetch data. Please try again later.", "error");
             setWarehouses([]);
@@ -108,17 +109,6 @@ export default function WarehouseListPage() {
         fetchData(currentFilters);
     }, [debouncedKeyword, filters.status, filters.createdFrom, filters.createdTo, filters.page, filters.size, filters.sort, fetchData]);
 
-    // 3. Hàm xử lý khi submit form tạo mới
-    const handleCreateSubmit = async (warehouseData) => {
-        try {
-            await warehouseService.createWarehouse(warehouseData);
-            addToast("Warehouse created successfully!", "success");
-            setIsModalOpen(false); // Đóng modal
-            fetchData(filters); // Tải lại dữ liệu để hiển thị kho mới
-        } catch (error) {
-            addToast(error.response?.data?.message || "Failed to create warehouse.", "error");
-        }
-    };
 
     // 4. Hàm xử lý thay đổi chung cho các filter
     const handleFilterChange = (field, value) => {
@@ -157,7 +147,6 @@ export default function WarehouseListPage() {
     const isFilterActive = filters.keyword !== '' || filters.status !== '' || filters.createdFrom !== '' || filters.createdTo !== '';
 
     const handleWarehouseCreated = () => {
-        // Hàm này được gọi sau khi tạo kho thành công để tải lại dữ liệu
         fetchData(filters);
     };
 
@@ -165,18 +154,20 @@ export default function WarehouseListPage() {
         <div className="p-6 bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto space-y-6">
                 {/* Thanh điều khiển chính */}
-                <div className="flex justify-between items-center">
-                    <h1 className="text-3xl font-bold text-gray-800">Warehouse Management</h1>
-                    <div className="flex items-center gap-4">
-                        <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
-                        {/* --- 2. Thay thế nút Create --- */}
-                        <Button
-                            onClick={() => setIsModalOpen(true)}
-                            variant="primary"
-                        >
-                            <FaPlus />
-                            <span className="hidden sm:inline">Create</span>
-                        </Button>
+                <div className="px-0 py-2">
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                            <h1 className="text-2xl md:text-3xl font-extrabold text-gray-900 truncate">Warehouse Management</h1>
+
+                        </div>
+
+                        <div className="flex items-center gap-3">
+                            <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
+                            <Button onClick={() => setIsModalOpen(true)} variant="primary" className="flex items-center gap-2">
+                                <FaPlus />
+                                <span className="hidden sm:inline">Create</span>
+                            </Button>
+                        </div>
                     </div>
                 </div>
 
@@ -232,15 +223,17 @@ export default function WarehouseListPage() {
                         />
                     </div>
 
-                    {/* --- 3. Thay thế nút Reset --- */}
-                    <div className="flex items-end justify-end">
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block invisible">Reset</label>
                         <Button
                             onClick={handleResetFilters}
                             disabled={!isFilterActive}
                             title="Reset Filters"
                             variant="danger"
+                            className="w-full"
                         >
                             <FaUndo />
+                            Reset
                         </Button>
                     </div>
                 </div>
