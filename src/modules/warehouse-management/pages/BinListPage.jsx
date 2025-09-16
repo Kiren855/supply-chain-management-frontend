@@ -1,29 +1,33 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import { FaPlus, FaList, FaTh, FaSearch, FaUndo, FaArrowLeft, FaLayerGroup } from 'react-icons/fa';
+// --- Thêm icon FaPencilAlt ---
+import { FaPlus, FaList, FaTh, FaUndo, FaArrowLeft, FaLayerGroup, FaPencilAlt } from 'react-icons/fa';
 import { useToast } from '@/contexts/ToastContext';
 import { motion } from 'framer-motion';
 import binService from '../service/binService';
 import zoneService from '../service/zoneService';
 import Pagination from '@/components/common/Pagination';
+import Button from '@/components/common/Button';
 import BinListView from '../components/BinListView';
 import BinCardView from '../components/BinCardView';
-import CreateBinModal from '../components/CreateBinModal'; // 1. Import modal mới
+import CreateBinModal from '../components/CreateBinModal';
+// --- 1. Import modal mới ---
+import UpdateZoneModal from '../components/UpdateZoneModal';
 
 const listPageSizes = [10, 20, 50];
 const cardPageSizes = [9, 12, 24];
 
-// --- Cập nhật State Filter ban đầu ---
 const initialFiltersState = {
     keyword: '',
-    updatedFrom: '', // Đổi từ createdFrom
-    updatedTo: '',   // Đổi từ createdTo
+    updatedFrom: '',
+    updatedTo: '',
     binType: '',
-    binStatus: '',     // Dành cho ACTIVE/INACTIVE
-    contentStatus: '', // Thêm mới: EMPTY, PARTIAL, FULL
+    binStatus: '',
+    contentStatus: '',
     page: 0,
-    size: listPageSizes[0],
-    sort: 'updateTimestamp,desc', // Cập nhật sort mặc định
+
+    size: cardPageSizes[0],
+    sort: 'updateTimestamp,desc',
 };
 
 function useDebounce(value, delay) {
@@ -55,9 +59,11 @@ export default function BinListPage() {
     const [zoneInfo, setZoneInfo] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [filters, setFilters] = useState(initialFiltersState);
-    const [viewMode, setViewMode] = useState('list');
+    const [viewMode, setViewMode] = useState('card');
     const [totalPages, setTotalPages] = useState(1);
-    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false); // 2. Thêm state cho modal
+    const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+    // --- 2. Thêm state cho modal update ---
+    const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const debouncedKeyword = useDebounce(filters.keyword, 700);
     const { addToast } = useToast();
 
@@ -99,6 +105,21 @@ export default function BinListPage() {
             addToast(message, 'error');
             // Ném lỗi để modal biết và hiển thị
             throw new Error(message);
+        }
+    };
+
+    // --- 3. Thêm hàm xử lý submit cho update zone ---
+    const handleUpdateZoneSubmit = async (zoneData) => {
+        try {
+            await zoneService.updateZone(warehouseId, zoneId, zoneData);
+            addToast('Zone updated successfully!', 'success');
+            setIsUpdateModalOpen(false);
+            // Tải lại thông tin zone để hiển thị dữ liệu mới
+            fetchZoneInfo();
+        } catch (err) {
+            const message = err.response?.data?.message || 'Failed to update zone.';
+            addToast(message, 'error');
+            throw new Error(message); // Ném lỗi để modal biết và không tự đóng
         }
     };
 
@@ -145,73 +166,125 @@ export default function BinListPage() {
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto flex flex-col gap-6">
-                {/* Header: Thông tin Zone cha */}
-                <div>
-                    <Link to={`/warehouses/${warehouseId}`} className="flex items-center gap-2 text-sm text-blue-600 hover:underline mb-2">
-                        <FaArrowLeft /> Back to Zones
-                    </Link>
-                    {zoneInfo ? (
-                        <>
-                            <h1 className="text-3xl font-bold text-gray-800">{zoneInfo.zone_name}</h1>
-                            <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                                <span className="font-mono bg-gray-200 px-2 py-0.5 rounded">{zoneInfo.zone_code}</span>
-                                <div className="flex items-center gap-1.5">
-                                    <FaLayerGroup />
-                                    <span>{zoneInfo.zone_type}</span>
-                                </div>
-                            </div>
-                        </>
-                    ) : (
-                        <div className="space-y-2 animate-pulse">
-                            <div className="h-8 bg-gray-200 rounded w-64"></div>
-                            <div className="h-5 bg-gray-200 rounded w-80"></div>
-                        </div>
-                    )}
-                </div>
 
-                {/* Khu vực điều khiển và filter */}
-                <div className="space-y-2">
-                    <div className="flex justify-end items-center gap-4">
-                        {/* 4. Thêm onClick cho nút Create Bin */}
-                        <button
-                            onClick={() => setIsCreateModalOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md"
+                <div className="flex justify-between items-end">
+                    {/* Cột bên trái: Thông tin Zone */}
+                    <div>
+                        <Link to={`/warehouses/${warehouseId}/zones`} className="flex items-center gap-2 text-sm text-blue-600 hover:underline mb-2">
+                            <FaArrowLeft /> Back to Zones
+                        </Link>
+                        {zoneInfo ? (
+                            <>
+                                <h1 className="text-3xl text-left font-bold text-gray-800">{zoneInfo.zone_name}</h1>
+                                <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                                    <span className="font-mono bg-gray-200 px-2 py-0.5 rounded">{zoneInfo.zone_code}</span>
+                                    <div className="flex items-center gap-1.5">
+                                        <FaLayerGroup />
+                                        <span>{zoneInfo.zone_type}</span>
+                                    </div>
+                                </div>
+                            </>
+                        ) : (
+                            <div className="space-y-2 animate-pulse">
+                                <div className="h-8 bg-gray-200 rounded w-64"></div>
+                                <div className="h-5 bg-gray-200 rounded w-80"></div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* Cột bên phải: Các nút hành động (đã căn xuống thấp hơn) */}
+                    <div className="flex items-end gap-4">
+                        <Button
+                            onClick={() => setIsUpdateModalOpen(true)}
+                            variant="warning"
+                            disabled={!zoneInfo}
                         >
-                            <FaPlus /> Create Bin
-                        </button>
+                            <FaPencilAlt />
+                            <span className="hidden sm:inline">Update Zone</span>
+                        </Button>
                         <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
                     </div>
-                    {/* --- Bỏ Sort khỏi khu vực filter, giảm cột xuống 5 --- */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4 p-4 bg-white rounded-lg shadow-sm border">
-                        <div className="lg:col-span-2">
-                            <label className="text-sm font-medium text-gray-700 mb-1 block">Search by Code/Name</label>
-                            <input type="text" placeholder="Enter keyword..." value={filters.keyword} onChange={(e) => handleFilterChange('keyword', e.target.value)} className="w-full p-2 border rounded-lg" />
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium text-gray-700 mb-1 block">Bin Type</label>
-                            <select value={filters.binType} onChange={(e) => handleFilterChange('binType', e.target.value)} className="w-full p-2 border rounded-lg bg-white">
-                                <option value="">All</option>
-                                <option value="SHELF">Shelf</option>
-                                <option value="PALLET">Pallet</option>
-                                <option value="RACK">Rack</option>
-                                <option value="FLOW_RACK">Flow Rack</option>
-                                <option value="CARTON_FLOW">Carton Flow</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label className="text-sm font-medium text-gray-700 mb-1 block">Content Status</label>
-                            <select value={filters.contentStatus} onChange={(e) => handleFilterChange('contentStatus', e.target.value)} className="w-full p-2 border rounded-lg bg-white">
-                                <option value="">All</option>
-                                <option value="EMPTY">Empty</option>
-                                <option value="PARTIAL">Partial</option>
-                                <option value="FULL">Full</option>
-                            </select>
-                        </div>
-                        <div className="flex items-end">
-                            <button onClick={handleResetFilters} disabled={!isFilterActive} className="w-full flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg text-white bg-red-500 hover:bg-red-600 disabled:bg-gray-400 transition-colors">
-                                <FaUndo /> Reset
-                            </button>
-                        </div>
+                </div>
+
+                {/* Khu vực filter với nút Create Bin mới */}
+                <div className="flex flex-col md:flex-row md:items-end gap-2 md:gap-4 p-4 bg-white rounded-lg shadow-sm border">
+                    <div className="flex-1">
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Search</label>
+                        <input
+                            type="text"
+                            value={filters.keyword || ''}
+                            onChange={e => handleFilterChange('keyword', e.target.value)}
+                            className="w-full p-2 border rounded-lg"
+                            placeholder="By code or name..."
+                        />
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Bin Type</label>
+                        <select
+                            value={filters.binType || ''}
+                            onChange={e => handleFilterChange('binType', e.target.value)}
+                            className="w-full p-2 border rounded-lg bg-white"
+                        >
+                            <option value="">All</option>
+                            <option value="SHELF">Shelf</option>
+                            <option value="PALLET">Pallet</option>
+                            <option value="RACK">Rack</option>
+                            <option value="FLOW_RACK">Flow Rack</option>
+                            <option value="CARTON_FLOW">Carton Flow</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Content Status</label>
+                        <select
+                            value={filters.contentStatus || ''}
+                            onChange={e => handleFilterChange('contentStatus', e.target.value)}
+                            className="w-full p-2 border rounded-lg bg-white"
+                        >
+                            <option value="">All</option>
+                            <option value="EMPTY">Empty</option>
+                            <option value="PARTIAL">Partial</option>
+                            <option value="FULL">Full</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Updated From</label>
+                        <input
+                            type="date"
+                            value={filters.updatedFrom || ''}
+                            onChange={e => handleFilterChange('updatedFrom', e.target.value)}
+                            className="w-full p-2 border rounded-lg"
+                        />
+                    </div>
+                    <div>
+                        <label className="text-sm font-medium text-gray-700 mb-1 block">Updated To</label>
+                        <input
+                            type="date"
+                            value={filters.updatedTo || ''}
+                            onChange={e => handleFilterChange('updatedTo', e.target.value)}
+                            className="w-full p-2 border rounded-lg"
+                        />
+                    </div>
+                    <div className="flex items-end">
+                        <Button
+                            onClick={handleResetFilters}
+                            disabled={!isFilterActive}
+                            variant="danger"
+                            className="w-full md:w-auto"
+                            title="Reset"
+                        >
+                            <FaUndo />
+                        </Button>
+                    </div>
+                    {/* Nút Create Bin nằm cùng hàng filter */}
+                    <div className="flex items-end">
+                        <Button
+                            onClick={() => setIsCreateModalOpen(true)}
+                            variant="success"
+                            className="w-full md:w-auto"
+                        >
+                            <FaPlus />
+                            <span className="hidden sm:inline">Create Bin</span>
+                        </Button>
                     </div>
                 </div>
 
@@ -259,12 +332,22 @@ export default function BinListPage() {
                 </div>
             </div>
 
-            {/* 5. Render modal */}
+            {/* Modal tạo bin */}
             <CreateBinModal
                 isOpen={isCreateModalOpen}
                 onClose={() => setIsCreateModalOpen(false)}
                 onSubmit={handleCreateBinSubmit}
             />
+
+            {/* --- 5. Render modal update zone --- */}
+            {zoneInfo && (
+                <UpdateZoneModal
+                    isOpen={isUpdateModalOpen}
+                    onClose={() => setIsUpdateModalOpen(false)}
+                    onSubmit={handleUpdateZoneSubmit}
+                    zoneData={zoneInfo}
+                />
+            )}
         </div>
     );
 }

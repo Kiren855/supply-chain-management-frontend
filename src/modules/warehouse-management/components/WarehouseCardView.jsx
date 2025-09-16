@@ -91,25 +91,27 @@ export default function WarehouseCardView({ warehouses, isLoading, onRowDoubleCl
                         animate={{ opacity: 1, y: 0 }}
                         transition={{ delay: index * 0.05 }}
                     >
-                        {/* Status Badge được thêm vào đây */}
-                        <div className="absolute top-3 right-3 z-20">
+                        {/* --- Sửa ở đây: Di chuyển Status Badge sang góc trên bên trái --- */}
+                        <div className="absolute top-3 left-3 z-20">
                             <StatusBadge status={wh.status} />
                         </div>
 
-                        {/* Header với màu nhấn và icon nền */}
-                        <div className={`relative p-5 ${accent.bg} text-white`}>
-                            {/* Di chuyển icon sang trái bằng cách đổi 'right-2' thành 'left-2' */}
-                            <FaWarehouse className="absolute left-2 top-1/2 -translate-y-1/2 text-white/10 text-7xl" />
+                        {/* --- Sửa ở đây: Dùng Flexbox để căn giữa text, không ảnh hưởng icon --- */}
+                        <div className={`relative p-6 ${accent.bg} text-white rounded-t-xl flex items-center justify-center min-h-[120px]`}>
+                            <FaWarehouse className="absolute -right-4 -bottom-4 text-white/10 text-8xl transition-transform duration-300 group-hover:scale-110" />
 
-                            {/* Thêm padding-left (pl-20) để tạo không gian cho icon */}
-                            <div className="relative z-10 pl-20">
-                                <h3 className="text-xl font-bold truncate">{wh.warehouse_name}</h3>
-                                <p className="text-sm font-mono text-white/80">{wh.warehouse_code}</p>
+                            <div className="relative z-10 text-center">
+                                <h3 className="text-2xl font-bold truncate" title={wh.warehouse_name}>
+                                    {wh.warehouse_name}
+                                </h3>
+                                <p className="font-mono text-sm text-blue-100 truncate" title={wh.warehouse_code}>
+                                    {wh.warehouse_code}
+                                </p>
                             </div>
                         </div>
 
                         {/* Phần thân thẻ với thông tin chi tiết */}
-                        <div className="p-5">
+                        <div className="p-5 space-y-4">
                             <div className="flex items-start gap-3 text-sm text-gray-700 mb-5">
                                 <FaMapMarkerAlt className={`mt-1 ${accent.text} flex-shrink-0`} />
                                 <span>{wh.location}</span>

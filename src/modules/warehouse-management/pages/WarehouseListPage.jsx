@@ -5,6 +5,7 @@ import { useToast } from '@/contexts/ToastContext';
 import { motion } from 'framer-motion';
 import warehouseService from '../service/warehouseService';
 import Pagination from '@/components/common/Pagination';
+import Button from '@/components/common/Button';
 import WarehouseListView from '../components/WarehouseListView';
 import WarehouseCardView from '../components/WarehouseCardView';
 import CreateWarehouseModal from '../components/CreateWarehouseModal'; // Import modal mới
@@ -74,7 +75,7 @@ export default function WarehouseListPage() {
     // Sử dụng state ban đầu đã định nghĩa
     const [filters, setFilters] = useState(initialFiltersState);
 
-    const [viewMode, setViewMode] = useState('list');
+    const [viewMode, setViewMode] = useState('card');
     const [totalPages, setTotalPages] = useState(1);
 
     // 2. Thêm state để quản lý modal
@@ -168,13 +169,14 @@ export default function WarehouseListPage() {
                     <h1 className="text-3xl font-bold text-gray-800">Warehouse Management</h1>
                     <div className="flex items-center gap-4">
                         <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
-                        {/* 4. Cập nhật nút Create để mở modal */}
-                        <button
+                        {/* --- 2. Thay thế nút Create --- */}
+                        <Button
                             onClick={() => setIsModalOpen(true)}
-                            className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                            variant="primary"
                         >
-                            <FaPlus /> Create
-                        </button>
+                            <FaPlus />
+                            <span className="hidden sm:inline">Create</span>
+                        </Button>
                     </div>
                 </div>
 
@@ -230,18 +232,16 @@ export default function WarehouseListPage() {
                         />
                     </div>
 
-                    {/* 4. Nút Reset Filters - phiên bản icon nhỏ gọn */}
+                    {/* --- 3. Thay thế nút Reset --- */}
                     <div className="flex items-end justify-end">
-                        <button
+                        <Button
                             onClick={handleResetFilters}
                             disabled={!isFilterActive}
                             title="Reset Filters"
-                            className={`flex items-center justify-center p-2.5 border border-transparent text-sm font-medium rounded-lg shadow-sm text-white 
-                                        ${isFilterActive ? 'bg-red-600 hover:bg-red-700' : 'bg-gray-400 cursor-not-allowed'} 
-                                        transition-all transform hover:scale-110`}
+                            variant="danger"
                         >
                             <FaUndo />
-                        </button>
+                        </Button>
                     </div>
                 </div>
 

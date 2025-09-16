@@ -2,7 +2,15 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaWarehouse, FaLayerGroup, FaInfoCircle } from 'react-icons/fa';
 
-const zoneTypes = ["STORAGE", "PICKING", "DOCK", "STAGING"];
+const zoneTypes = [
+    "RECEIVING",
+    "STORAGE",
+    "PICKING",
+    "PACKING",
+    "SHIPPING",
+    "RETURN",
+    "QC"
+];
 
 export default function CreateZoneModal({ isOpen, onClose, onSubmit }) {
     const [zoneName, setZoneName] = useState('');
@@ -96,7 +104,9 @@ export default function CreateZoneModal({ isOpen, onClose, onSubmit }) {
                                             className="block w-full rounded-md border-gray-300 pl-10 focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm p-2.5"
                                         >
                                             {zoneTypes.map(type => (
-                                                <option key={type} value={type}>{type.charAt(0) + type.slice(1).toLowerCase()}</option>
+                                                <option key={type} value={type}>
+                                                    {type.charAt(0) + type.slice(1).toLowerCase()}
+                                                </option>
                                             ))}
                                         </select>
                                     </div>

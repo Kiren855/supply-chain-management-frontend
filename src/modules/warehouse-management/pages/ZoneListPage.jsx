@@ -4,8 +4,10 @@ import { FaPlus, FaList, FaTh, FaSearch, FaUndo, FaArrowLeft, FaMapMarkerAlt, Fa
 import { useToast } from '@/contexts/ToastContext';
 import { motion } from 'framer-motion';
 import zoneService from '../service/zoneService';
-import warehouseService from '../service/warehouseService'; // 1. Import warehouseService
+import warehouseService from '../service/warehouseService';
 import Pagination from '@/components/common/Pagination';
+// --- 1. Import Button ---
+import Button from '@/components/common/Button';
 import ZoneListView from '../components/ZoneListView';
 import ZoneCardView from '../components/ZoneCardView';
 import UpdateWarehouseModal from '../components/UpdateWarehouseModal';
@@ -16,8 +18,8 @@ const cardPageSizes = [3, 6, 9, 12, 24];
 
 const initialFiltersState = {
     keyword: '',
-    createdFrom: '',
-    createdTo: '',
+    updatedFrom: '',
+    updatedTo: '',
     zoneType: '', // Thêm filter cho zone type
     page: 0,
     size: listPageSizes[0],
@@ -74,7 +76,7 @@ export default function ZoneListPage() {
     const [warehouseInfo, setWarehouseInfo] = useState(null); // 2. Thêm state để lưu thông tin kho
     const [isLoading, setIsLoading] = useState(true);
     const [filters, setFilters] = useState(initialFiltersState);
-    const [viewMode, setViewMode] = useState('list');
+    const [viewMode, setViewMode] = useState('card');
     const [totalPages, setTotalPages] = useState(1);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false); // State cho modal update
@@ -112,7 +114,7 @@ export default function ZoneListPage() {
     useEffect(() => {
         const currentFilters = { ...filters, keyword: debouncedKeyword };
         fetchData(currentFilters);
-    }, [debouncedKeyword, filters.createdFrom, filters.createdTo, filters.zoneType, filters.page, filters.size, filters.sort, fetchData]);
+    }, [debouncedKeyword, filters.updatedFrom, filters.updatedTo, filters.zoneType, filters.page, filters.size, filters.sort, fetchData]);
 
     const handleFilterChange = (field, value) => {
         setFilters(prev => ({
@@ -161,53 +163,56 @@ export default function ZoneListPage() {
     };
 
     const currentPageSizes = viewMode === 'list' ? listPageSizes : cardPageSizes;
-    const isFilterActive = filters.keyword !== '' || filters.createdFrom !== '' || filters.createdTo !== '' || filters.zoneType !== '';
+    const isFilterActive = filters.keyword !== '' || filters.updatedFrom !== '' || filters.updatedTo !== '' || filters.zoneType !== '';
 
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
-            <div className="max-w-7xl mx-auto space-y-6">
-                <div className="flex justify-between items-center">
-                    <div>
-                        <Link to="/warehouses" className="flex items-center gap-2 text-sm text-blue-600 hover:underline mb-2">
-                            <FaArrowLeft /> Back to Warehouses
-                        </Link>
-                        {/* 4. Cập nhật tiêu đề */}
-                        {warehouseInfo ? (
-                            <>
-                                <h1 className="text-3xl text-left font-bold text-gray-800">{warehouseInfo.warehouse_name}</h1>
-                                <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                                    <span className="font-mono bg-gray-200 px-2 py-0.5 rounded">{warehouseInfo.warehouse_code}</span>
-                                    <div className="flex items-center gap-1.5">
-                                        <FaMapMarkerAlt />
-                                        <span>{warehouseInfo.location}</span>
+            <div className="max-w-7xl mx-auto flex flex-col gap-6">
+
+                {/* KHỐI HEADER ĐÃ ĐƯỢC GỘP LẠI THÀNH MỘT MỤC DUY NHẤT */}
+                <div>
+                    <Link to="/warehouses" className="flex items-center gap-2 text-sm text-blue-600 hover:underline mb-2">
+                        <FaArrowLeft /> Back to Warehouses
+                    </Link>
+
+                    {/* DIV NÀY GIỜ ĐÂY BAO BỌC CẢ THÔNG TIN VÀ NÚT */}
+                    <div className="flex justify-between items-end">
+
+                        {/* Cột bên trái: Thông tin kho */}
+                        <div>
+                            {warehouseInfo ? (
+                                <>
+                                    <h1 className="text-3xl text-left font-bold text-gray-800">{warehouseInfo.warehouse_name}</h1>
+                                    <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
+                                        <span className="font-mono bg-gray-200 px-2 py-0.5 rounded">{warehouseInfo.warehouse_code}</span>
+
                                     </div>
+                                </>
+                            ) : (
+                                <div className="space-y-2">
+                                    <div className="h-8 bg-gray-200 rounded w-48 animate-pulse"></div>
+                                    <div className="h-4 bg-gray-200 rounded w-32 animate-pulse"></div>
                                 </div>
-                            </>
-                        ) : (
-                            <div className="space-y-2 animate-pulse">
-                                <div className="h-8 bg-gray-200 rounded w-64"></div>
-                                <div className="h-5 bg-gray-200 rounded w-80"></div>
-                            </div>
-                        )}
-                    </div>
-                    <div className="flex items-center gap-4">
-                        {/* Thêm nút Update Warehouse */}
-                        <button
-                            onClick={() => setIsUpdateModalOpen(true)}
-                            className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 transition-all"
-                        >
-                            <FaPencilAlt /> Update
-                        </button>
-                        <button
-                            className="flex items-center gap-2 px-4 py-2 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-600 transition-all"
-                        >
-                            <FaPencilAlt />Change status
-                        </button>
-                        <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
+                            )}
+                        </div>
+
+                        {/* Cột bên phải: Các nút hành động */}
+                        <div className="flex items-center gap-4">
+                            <Button onClick={() => setIsUpdateModalOpen(true)} variant="warning">
+                                <FaPencilAlt />
+                                <span className="hidden sm:inline">Update</span>
+                            </Button>
+                            <Button variant="success">
+                                <FaPencilAlt />
+                                <span className="hidden sm:inline lg:hidden">Status</span>
+                                <span className="hidden lg:inline">Change Status</span>
+                            </Button>
+                            <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
+                        </div>
                     </div>
                 </div>
 
-                {/* 2. Mở rộng grid lên 8 cột và thêm nút Create */}
+                {/* KHỐI FILTER (Mục thứ 2) */}
                 <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-8 gap-4 p-4 bg-white rounded-lg shadow-sm border">
                     {/* Search Input (chiếm 3 cột) */}
                     <div className="relative lg:col-span-3">
@@ -223,26 +228,26 @@ export default function ZoneListPage() {
                         />
                     </div>
 
-                    {/* Created From */}
+                    {/* Updated From */}
                     <div>
-                        <label htmlFor="created-from" className="text-sm font-medium text-gray-700 mb-1 block">Created From</label>
+                        <label htmlFor="updated-from" className="text-sm font-medium text-gray-700 mb-1 block">Updated From</label>
                         <input
-                            id="created-from"
+                            id="updated-from"
                             type="date"
-                            value={filters.createdFrom}
-                            onChange={(e) => handleFilterChange('createdFrom', e.target.value)}
+                            value={filters.updatedFrom}
+                            onChange={(e) => handleFilterChange('updatedFrom', e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                         />
                     </div>
 
-                    {/* Created To */}
+                    {/* Updated To */}
                     <div>
-                        <label htmlFor="created-to" className="text-sm font-medium text-gray-700 mb-1 block">Created To</label>
+                        <label htmlFor="updated-to" className="text-sm font-medium text-gray-700 mb-1 block">Updated To</label>
                         <input
-                            id="created-to"
+                            id="updated-to"
                             type="date"
-                            value={filters.createdTo}
-                            onChange={(e) => handleFilterChange('createdTo', e.target.value)}
+                            value={filters.updatedTo}
+                            onChange={(e) => handleFilterChange('updatedTo', e.target.value)}
                             className="w-full px-4 py-2 border border-gray-300 rounded-lg shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
                         />
                     </div>
@@ -262,28 +267,28 @@ export default function ZoneListPage() {
                     {/* Nút Reset */}
                     <div>
                         <label className="text-sm font-medium text-gray-700 mb-1 block invisible">Reset</label>
-                        <button
+                        <Button
                             onClick={handleResetFilters}
                             disabled={!isFilterActive}
                             title="Reset Filters"
-                            className={`w-full flex items-center justify-center gap-2 px-4 py-2 font-semibold rounded-lg shadow-lg text-white 
-                                        ${isFilterActive ? 'bg-red-600 hover:bg-red-700 hover:shadow-xl' : 'bg-gray-400 cursor-not-allowed'} 
-                                        transition-all duration-300 transform hover:scale-105`}
+                            variant="danger"
+                            className="w-full"
                         >
                             <FaUndo />
                             Reset
-                        </button>
+                        </Button>
                     </div>
 
                     {/* Nút Create Zone */}
                     <div>
                         <label className="text-sm font-medium text-gray-700 mb-1 block invisible">Create</label>
-                        <button
+                        <Button
                             onClick={() => setIsModalOpen(true)}
-                            className="w-full flex items-center justify-center gap-2 px-4 py-2 bg-gradient-to-r from-cyan-500 to-sky-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-300"
+                            variant="info"
+                            className="w-full"
                         >
                             <FaPlus /> Create
-                        </button>
+                        </Button>
                     </div>
                 </div>
 
