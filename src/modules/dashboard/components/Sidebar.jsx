@@ -68,7 +68,7 @@ export default function Sidebar() {
         }`;
 
     return (
-        <div className={`bg-white border-r border-gray-200 min-h-screen flex flex-col transition-all duration-300
+        <div className={`bg-white border-r border-gray-200 flex flex-col transition-all duration-300
         ${collapsed ? "w-20" : "w-64"} flex-shrink-0 shadow-sm`}>
             <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200">
                 {!collapsed && <span className="text-xl font-bold text-blue-600">SCM</span>}
@@ -77,7 +77,7 @@ export default function Sidebar() {
                 </button>
             </div>
 
-            <nav className="flex-1 p-2 space-y-1">
+            <nav className="flex-1 p-2 space-y-1 overflow-y-auto">
                 {menuItems.map((menu) => (
                     <div key={menu.name} className="relative group">
                         {menu.children ? (
@@ -115,7 +115,7 @@ export default function Sidebar() {
                                 }
                             `}>
                                 {menu.children.map((child) => (
-                                    <NavLink key={child.name} to={child.path} className={navLinkClass}>
+                                    <NavLink key={child.name} to={`/${child.path}`} className={navLinkClass}>
                                         <child.icon className="w-4 h-4 mr-3" />
                                         <span>{child.name}</span>
                                     </NavLink>

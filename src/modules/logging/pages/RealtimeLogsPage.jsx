@@ -49,9 +49,11 @@ export default function RealtimeLogsPage() {
     const clientRef = useRef(null);
     const isRetryingRef = useRef(false);
     const scrollContainerRef = useRef(null);
+    const effectRan = useRef(false); // Thêm một ref để kiểm soát useEffect
 
     // BƯỚC 1: Gói toàn bộ logic kết nối vào một hàm
-    const connectWebSocket = async () => {
+    // Bọc connectWebSocket trong useCallback
+    const connectWebSocket = useCallback(async () => {
         if (clientRef.current?.active) {
             await clientRef.current.deactivate();
         }
@@ -75,19 +77,13 @@ export default function RealtimeLogsPage() {
                 isRetryingRef.current = false;
                 client.subscribe(`/topic/logs/${companyId}`, (message) => {
                     const rawLog = JSON.parse(message.body);
-
-                    // Chuẩn hóa đối tượng log real-time
                     const newLog = {
                         username: rawLog.username,
                         activity: rawLog.activity,
-                        // Gán giá trị từ `rawLog.timestamp` vào `creation_timestamp`
                         creation_timestamp: rawLog.timestamp
                     };
-
-                    // Chỉ thêm log mới nếu đang xem ngày hôm nay
-                    if (isToday(selectedDate)) {
-                        setLogs(prevLogs => [newLog, ...prevLogs]);
-                    }
+                    // Dùng callback để đảm bảo an toàn khi cập nhật state
+                    setLogs(prevLogs => [newLog, ...prevLogs]);
                 });
             },
             onWebSocketError: async (error) => {
@@ -96,12 +92,11 @@ export default function RealtimeLogsPage() {
                     setConnectionStatus('Fatal Error: Could not connect after refresh.');
                     return;
                 }
-
                 setConnectionStatus('Authentication Failed. Refreshing token...');
                 isRetryingRef.current = true;
                 try {
                     await refreshToken();
-                    connectWebSocket(); // Gọi lại chính nó để thử lại
+                    connectWebSocket();
                 } catch (refreshError) {
                     setConnectionStatus('Fatal Error: Could not refresh token.');
                 }
@@ -114,7 +109,7 @@ export default function RealtimeLogsPage() {
 
         clientRef.current = client;
         client.activate();
-    };
+    }, []); // Mảng phụ thuộc rỗng để đảm bảo hàm chỉ được tạo một lần
 
     const loadOlderLogs = useCallback(async () => {
         if (isLoadingOlder || !hasMore || logs.length === 0) return;
@@ -136,53 +131,57 @@ export default function RealtimeLogsPage() {
         }
     }, [logs, isLoadingOlder, hasMore]);
 
-    // --- USEEFFECT CHÍNH: Chạy lại mỗi khi `selectedDate` thay đổi ---
+    // --- USEEFFECT CHÍNH: Đã được cấu trúc lại ---
     useEffect(() => {
-        const loadLogsAndManageSocket = async () => {
-            setIsLoading(true);
-            setHasMore(true); // Reset khi đổi ngày
-            // Luôn ngắt kết nối cũ trước khi làm gì khác
-            if (clientRef.current?.active) {
-                await clientRef.current.deactivate();
-                setConnectionStatus('Disconnected');
-            }
-
-            // 1. Tải log lịch sử cho ngày đã chọn
-            try {
-                const start = new Date(selectedDate);
-                start.setHours(0, 0, 0, 0);
-
-                const end = new Date(selectedDate);
-                end.setHours(23, 59, 59, 999);
-
-                const response = await logService.getLatestLogs(start, end);
-                const initialLogs = response.result || [];
-                setLogs(initialLogs);
-                if (initialLogs.length < PAGE_SIZE) {
-                    setHasMore(false);
-                }
-            } catch (error) {
-                console.error("Failed to fetch logs for date:", error);
+        // Chỉ chạy logic bên trong nếu đây là lần chạy thứ hai trong Strict Mode,
+        // hoặc lần chạy duy nhất trong Production.
+        if (effectRan.current === true || process.env.NODE_ENV !== 'development') {
+            const loadHistoricalLogs = async () => {
+                setIsLoading(true);
+                setHasMore(true);
                 setLogs([]);
-            } finally {
-                setIsLoading(false);
-            }
 
-            // 2. Chỉ kết nối WebSocket nếu ngày được chọn là hôm nay
+                try {
+                    const start = new Date(selectedDate);
+                    start.setHours(0, 0, 0, 0);
+                    const end = new Date(selectedDate);
+                    end.setHours(23, 59, 59, 999);
+
+                    const response = await logService.getLatestLogs(start, end);
+                    const initialLogs = response.result || [];
+                    setLogs(initialLogs);
+                    if (initialLogs.length < PAGE_SIZE) {
+                        setHasMore(false);
+                    }
+                } catch (error) {
+                    console.error("Failed to fetch logs for date:", error);
+                    setLogs([]);
+                } finally {
+                    setIsLoading(false);
+                }
+            };
+
+            loadHistoricalLogs();
+
+            let stompClient = null;
             if (isToday(selectedDate)) {
                 connectWebSocket();
+                stompClient = clientRef.current;
             }
-        };
 
-        loadLogsAndManageSocket();
+            return () => {
+                if (stompClient?.active) {
+                    stompClient.deactivate();
+                    setConnectionStatus('Disconnected');
+                }
+            };
+        }
 
-        // Hàm dọn dẹp khi component unmount
+        // Đánh dấu rằng effect đã chạy một lần.
         return () => {
-            if (clientRef.current) {
-                clientRef.current.deactivate();
-            }
+            effectRan.current = true;
         };
-    }, [selectedDate]); // Phụ thuộc vào `selectedDate`
+    }, [selectedDate, connectWebSocket]); // Dependency array giữ nguyên
 
     useEffect(() => {
         const container = scrollContainerRef.current;
@@ -249,7 +248,8 @@ export default function RealtimeLogsPage() {
     };
 
     return (
-        <div className="flex flex-col h-full space-y-6">
+        // Sửa `h-full` thành `h-screen`
+        <div className="flex flex-col h-screen space-y-6 p-6 bg-gray-50">
             {/* Phần Header: Không thay đổi */}
             <div className="flex justify-between items-center flex-shrink-0">
                 <h1 className="text-3xl font-bold text-gray-800">Activity Logs</h1>
@@ -277,7 +277,7 @@ export default function RealtimeLogsPage() {
                 </div>
             </div>
 
-            <div className="flex-grow relative bg-white rounded-2xl shadow-lg border border-gray-200">
+            <div className="flex-grow relative bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                 <div ref={scrollContainerRef} className="absolute inset-0 overflow-y-auto">
                     <table className="min-w-full divide-y divide-gray-200">
                         <thead className="bg-gray-50 sticky top-0 z-10">

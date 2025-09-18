@@ -29,10 +29,6 @@ const groupService = {
         return data;
     },
 
-    addUser: async (groupId, userId) => {
-        const { data } = await apiClient.post(API_ENDPOINTS.GROUP.ADD_USER(groupId, userId));
-        return data;
-    },
 
     addUsers: async (groupId, payload) => {
         const { data } = await apiClient.post(API_ENDPOINTS.GROUP.ADD_USERS(groupId), payload);

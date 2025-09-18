@@ -1,1 +1,15 @@
 @import "tailwindcss";
+
+/* Thu nhỏ UI: 100% trình duyệt ≈ 75% trước đây */
+html {
+    font-size: 75%;
+}
+
+/* 16px -> 12px */
+
+/* Tùy chọn responsive: mobile giữ readable */
+@media (max-width: 480px) {
+    html {
+        font-size: 87.5%;
+    }
+}

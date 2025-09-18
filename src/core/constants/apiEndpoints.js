@@ -1,3 +1,5 @@
+import { UPDATE } from "react-admin";
+
 const API_ENDPOINTS = {
     AUTH: {
         REGISTER: "http://localhost:9000/identity/api/v1/auth/root/register",
@@ -49,14 +51,53 @@ const API_ENDPOINTS = {
         DETAIL: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
         UPDATE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
         DELETE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}`,
-
+        GET_PACKAGES: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages`,
+        DELETE_PACKAGE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages`,
+        UPDATE_PACKAGE: (productId, packageId) => `http://localhost:9000/product/api/v1/products/${productId}/packages/${packageId}`,
+        CREATE_PACKAGE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages`,
+        LIST_ACTIVE: "http://localhost:9000/product/api/v1/products/warehouse",
+        GET_PACKAGES: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages/all`,
+        GET_PACKAGES_BY_IDS: "http://localhost:9000/product/api/v1/packages"
     },
     CATEGORY: {
         LIST: "http://localhost:9000/product/api/v1/categories",
         CREATE: "http://localhost:9000/product/api/v1/categories",
         GET_ROOT: "http://localhost:9000/product/api/v1/categories/root",
         GET_CHILDREN: (categoryId) => `http://localhost:9000/product/api/v1/categories/${categoryId}/children`,
-    }
+    },
+
+    WAREHOUSE: {
+        LIST: "http://localhost:9000/warehouse/api/v1/warehouses",
+        CREATE: "http://localhost:9000/warehouse/api/v1/warehouses",
+        GET_BY_ID: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
+        UPDATE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
+        DELETE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
+        CREATE_GOOD_RECEIPT: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/good-receipts`,
+        GET_GOOD_RECEIPTS: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/good-receipts`,
+        GET_GOOD_RECEIPT_BY_ID: (warehouseId, receiptId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/good-receipts/${receiptId}`,
+        CANCEL_GOOD_RECEIPT: (warehouseId, receiptId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/good-receipts/${receiptId}/cancel`,
+        CANCEL_GROUP_RECEIPT: (warehouseId, groupReceiptId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/group-receipts/${groupReceiptId}/cancel`,
+        DOWNLOAD_GROUP_RECEIPT_PUTAWAY: (groupReceiptId) => `http://localhost:9000/warehouse/api/v1/group-receipts/${groupReceiptId}/download`,
+
+        // Group receipts endpoints (POST to process group receipts, GET to list)
+        PROCESS_GROUP_RECEIPTS: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/group-receipts`,
+        GET_GROUP_RECEIPTS: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/group-receipts`,
+    },
+
+    ZONE: {
+        LIST: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones`,
+        CREATE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones`,
+        GET_BY_ID: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
+        UPDATE: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
+        DELETE: (warehouseId, zoneId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/zones/${zoneId}`,
+    },
+
+    BIN: {
+        LIST: (zoneId) => `http://localhost:9000/warehouse/api/v1/zones/${zoneId}/bins`,
+        CREATE: (zoneId) => `http://localhost:9000/warehouse/api/v1/zones/${zoneId}/bins`,
+        GET_BY_ID: (zoneId, binId) => `http://localhost:9000/warehouse/api/v1/zones/${zoneId}/bins/${binId}`,
+        UPDATE: (zoneId, binId) => `http://localhost:9000/warehouse/api/v1/zones/${zoneId}/bins/${binId}`,
+    },
 };
 
 export default API_ENDPOINTS;
