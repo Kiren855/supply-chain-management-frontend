@@ -223,17 +223,15 @@ export default function WarehouseListPage() {
                         />
                     </div>
 
-                    <div>
-                        <label className="text-sm font-medium text-gray-700 mb-1 block invisible">Reset</label>
+                    {/* --- 3. Thay thế nút Reset --- */}
+                    <div className="flex items-end justify-end">
                         <Button
                             onClick={handleResetFilters}
                             disabled={!isFilterActive}
                             title="Reset Filters"
                             variant="danger"
-                            className="w-full"
                         >
                             <FaUndo />
-                            Reset
                         </Button>
                     </div>
                 </div>
@@ -274,6 +272,6 @@ export default function WarehouseListPage() {
                 onClose={() => setIsModalOpen(false)}
                 onWarehouseCreated={handleWarehouseCreated}
             />
-        </div>
+        </div >
     );
 }

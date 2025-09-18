@@ -168,25 +168,14 @@ export default function ZoneListPage() {
     return (
         <div className="p-6 bg-gray-50 min-h-screen">
             <div className="max-w-7xl mx-auto flex flex-col gap-6">
-
-                {/* KHỐI HEADER ĐÃ ĐƯỢC GỘP LẠI THÀNH MỘT MỤC DUY NHẤT */}
                 <div>
-                    <Link to="/warehouses" className="flex items-center gap-2 text-sm text-blue-600 hover:underline mb-2">
-                        <FaArrowLeft /> Back to Warehouses
-                    </Link>
-
-                    {/* DIV NÀY GIỜ ĐÂY BAO BỌC CẢ THÔNG TIN VÀ NÚT */}
                     <div className="flex justify-between items-end">
 
                         {/* Cột bên trái: Thông tin kho */}
                         <div>
                             {warehouseInfo ? (
                                 <>
-                                    <h1 className="text-3xl text-left font-bold text-gray-800">{warehouseInfo.warehouse_name}</h1>
-                                    <div className="flex items-center gap-4 text-sm text-gray-500 mt-1">
-                                        <span className="font-mono bg-gray-200 px-2 py-0.5 rounded">{warehouseInfo.warehouse_code}</span>
 
-                                    </div>
                                 </>
                             ) : (
                                 <div className="space-y-2">
@@ -198,15 +187,6 @@ export default function ZoneListPage() {
 
                         {/* Cột bên phải: Các nút hành động */}
                         <div className="flex items-center gap-4">
-                            <Button onClick={() => setIsUpdateModalOpen(true)} variant="warning">
-                                <FaPencilAlt />
-                                <span className="hidden sm:inline">Update</span>
-                            </Button>
-                            <Button variant="success">
-                                <FaPencilAlt />
-                                <span className="hidden sm:inline lg:hidden">Status</span>
-                                <span className="hidden lg:inline">Change Status</span>
-                            </Button>
                             <ViewModeToggle viewMode={viewMode} onViewModeChange={handleViewModeChange} />
                         </div>
                     </div>

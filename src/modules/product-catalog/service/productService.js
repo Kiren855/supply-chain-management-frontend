@@ -141,7 +141,18 @@ const productService = {
             data: { package_ids: packageIds }
         });
         return data;
-    }
+    },
+
+    /**
+     * Lấy thông tin nhiều package theo danh sách id
+     * POST /product/api/v1/packages
+     * body: { package_ids: [1,2,3] }
+     */
+    getPackagesByIds: async (packageIds = []) => {
+        if (!Array.isArray(packageIds)) packageIds = [packageIds];
+        const { data } = await apiClient.post(API_ENDPOINTS.PRODUCT.GET_PACKAGES_BY_IDS, { package_ids: packageIds });
+        return data;
+    },
 };
 
 export default productService;

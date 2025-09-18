@@ -55,8 +55,9 @@ const API_ENDPOINTS = {
         DELETE_PACKAGE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages`,
         UPDATE_PACKAGE: (productId, packageId) => `http://localhost:9000/product/api/v1/products/${productId}/packages/${packageId}`,
         CREATE_PACKAGE: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages`,
-
-
+        LIST_ACTIVE: "http://localhost:9000/product/api/v1/products/warehouse",
+        GET_PACKAGES: (productId) => `http://localhost:9000/product/api/v1/products/${productId}/packages/all`,
+        GET_PACKAGES_BY_IDS: "http://localhost:9000/product/api/v1/packages"
     },
     CATEGORY: {
         LIST: "http://localhost:9000/product/api/v1/categories",
@@ -71,6 +72,16 @@ const API_ENDPOINTS = {
         GET_BY_ID: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
         UPDATE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
         DELETE: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}`,
+        CREATE_GOOD_RECEIPT: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/good-receipts`,
+        GET_GOOD_RECEIPTS: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/good-receipts`,
+        GET_GOOD_RECEIPT_BY_ID: (warehouseId, receiptId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/good-receipts/${receiptId}`,
+        CANCEL_GOOD_RECEIPT: (warehouseId, receiptId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/good-receipts/${receiptId}/cancel`,
+        CANCEL_GROUP_RECEIPT: (warehouseId, groupReceiptId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/group-receipts/${groupReceiptId}/cancel`,
+        DOWNLOAD_GROUP_RECEIPT_PUTAWAY: (groupReceiptId) => `http://localhost:9000/warehouse/api/v1/group-receipts/${groupReceiptId}/download`,
+
+        // Group receipts endpoints (POST to process group receipts, GET to list)
+        PROCESS_GROUP_RECEIPTS: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/group-receipts`,
+        GET_GROUP_RECEIPTS: (warehouseId) => `http://localhost:9000/warehouse/api/v1/warehouses/${warehouseId}/group-receipts`,
     },
 
     ZONE: {

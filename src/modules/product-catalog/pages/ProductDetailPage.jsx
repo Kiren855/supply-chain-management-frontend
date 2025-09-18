@@ -88,9 +88,21 @@ export default function ProductDetailPage() {
                     productService.getPackages(productId, 0, 5)
                 ]);
                 setProduct(productResponse.result);
-                setPackages(packagesResponse.result.content);
-                setPackagePage(packagesResponse.result.pageNumber);
-                setPackageTotalPages(packagesResponse.result.totalPages);
+
+                // robust fallback: response.result may be an array or an object with content
+                const initialPackages =
+                    packagesResponse?.result ??
+                    packagesResponse?.result?.content ??
+                    packagesResponse?.data?.result?.content ??
+                    packagesResponse?.data?.content ??
+                    packagesResponse?.data ??
+                    packagesResponse?.content ??
+                    [];
+
+                setPackages(Array.isArray(initialPackages) ? initialPackages : []);
+                setPackagePage(packagesResponse?.result?.pageNumber ?? packagesResponse?.pageNumber ?? 0);
+                setPackageTotalPages(packagesResponse?.result?.totalPages ?? packagesResponse?.totalPages ?? 1);
+
                 setEditedName(productResponse.result.product_name);
                 setEditedDescription(productResponse.result.description || "");
                 setEditedUnit(unitOptions.find(u => u.value === productResponse.result.unit));
@@ -175,9 +187,20 @@ export default function ProductDetailPage() {
         setSelectedPackages([]);
         try {
             const response = await productService.getPackages(productId, page, 5);
-            setPackages(response.result.content);
-            setPackagePage(response.result.pageNumber);
-            setPackageTotalPages(response.result.totalPages);
+
+            // robust fallback for multiple response shapes
+            const items =
+                response?.result ??
+                response?.result?.content ??
+                response?.data?.result?.content ??
+                response?.data?.content ??
+                response?.data ??
+                response?.content ??
+                [];
+
+            setPackages(Array.isArray(items) ? items : []);
+            setPackagePage(response?.result?.pageNumber ?? response?.pageNumber ?? 0);
+            setPackageTotalPages(response?.result?.totalPages ?? response?.totalPages ?? 1);
         } catch (error) {
             addToast("Could not load packages.", "error");
         } finally {
